@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:somer/level_75",
+  "display": {
+    "icon": {
+      "item": "minecraft:painting"
+    },
+    "title": "Statuie Vie",
+    "description": "Job somer - Nivel 80",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

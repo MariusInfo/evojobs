@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:digger/level_90",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_shovel"
+    },
+    "title": "Zeul Pământului",
+    "description": "Job digger - Nivel 100",
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

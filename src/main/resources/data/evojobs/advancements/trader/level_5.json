@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:trader/start",
+  "display": {
+    "icon": {
+      "item": "minecraft:emerald"
+    },
+    "title": "Negociator Slab",
+    "description": "Job trader - Nivel 5",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

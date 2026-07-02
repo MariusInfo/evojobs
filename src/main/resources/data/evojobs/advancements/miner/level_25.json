@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:miner/level_20",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_pickaxe"
+    },
+    "title": "Spărgător de Stânci",
+    "description": "Job miner - Nivel 25",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

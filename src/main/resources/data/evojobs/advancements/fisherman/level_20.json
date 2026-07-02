@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:fisherman/level_10",
+  "display": {
+    "icon": {
+      "item": "minecraft:fishing_rod"
+    },
+    "title": "Pescar de Râu",
+    "description": "Job fisherman - Nivel 20",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:fierar/level_50",
+  "display": {
+    "icon": {
+      "item": "minecraft:anvil"
+    },
+    "title": "Făuritor de Săbii",
+    "description": "Job fierar - Nivel 60",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:trader/level_5",
+  "display": {
+    "icon": {
+      "item": "minecraft:emerald"
+    },
+    "title": "Bișnițar Începător",
+    "description": "Job trader - Nivel 10",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

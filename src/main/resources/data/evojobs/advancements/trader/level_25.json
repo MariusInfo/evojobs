@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:trader/level_20",
+  "display": {
+    "icon": {
+      "item": "minecraft:emerald"
+    },
+    "title": "Bișnițar Local",
+    "description": "Job trader - Nivel 25",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

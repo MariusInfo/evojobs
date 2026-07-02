@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:digger/level_20",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_shovel"
+    },
+    "title": "Excavator Uman",
+    "description": "Job digger - Nivel 25",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

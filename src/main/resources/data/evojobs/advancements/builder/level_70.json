@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:builder/level_60",
+  "display": {
+    "icon": {
+      "item": "minecraft:bricks"
+    },
+    "title": "Maestru Constructor",
+    "description": "Job builder - Nivel 70",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:hunter/level_75",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_sword"
+    },
+    "title": "Vânător de Dragoni",
+    "description": "Job hunter - Nivel 80",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

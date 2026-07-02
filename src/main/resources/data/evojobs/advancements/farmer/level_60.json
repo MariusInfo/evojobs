@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:farmer/level_50",
+  "display": {
+    "icon": {
+      "item": "minecraft:wheat"
+    },
+    "title": "Îmblânzitor de Bestii",
+    "description": "Job farmer - Nivel 60",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

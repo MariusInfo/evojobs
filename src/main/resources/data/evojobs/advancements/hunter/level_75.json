@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:hunter/level_70",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_sword"
+    },
+    "title": "Eradicator de Umbre",
+    "description": "Job hunter - Nivel 75",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

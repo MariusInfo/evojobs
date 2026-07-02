@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:trader/level_30",
+  "display": {
+    "icon": {
+      "item": "minecraft:emerald"
+    },
+    "title": "Negustor Respectat",
+    "description": "Job trader - Nivel 40",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

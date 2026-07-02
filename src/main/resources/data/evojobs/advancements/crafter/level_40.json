@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:crafter/level_30",
+  "display": {
+    "icon": {
+      "item": "minecraft:crafting_table"
+    },
+    "title": "Meșter în Diamante",
+    "description": "Job crafter - Nivel 40",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

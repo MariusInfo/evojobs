@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:trader/level_90",
+  "display": {
+    "icon": {
+      "item": "minecraft:emerald"
+    },
+    "title": "Monopolistul Suprem",
+    "description": "Job trader - Nivel 100",
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

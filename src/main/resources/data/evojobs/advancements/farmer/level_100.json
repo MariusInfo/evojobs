@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:farmer/level_90",
+  "display": {
+    "icon": {
+      "item": "minecraft:wheat"
+    },
+    "title": "Zeul Agriculturii",
+    "description": "Job farmer - Nivel 100",
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

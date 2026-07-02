@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:root",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_pickaxe"
+    },
+    "title": "§eCarieră: Miner",
+    "description": "Începe-ți aventura ca miner!",
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "auto": {
+      "trigger": "minecraft:tick"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:woodcutter/level_30",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_axe"
+    },
+    "title": "Defrișator",
+    "description": "Job woodcutter - Nivel 40",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

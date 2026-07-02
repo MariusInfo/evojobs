@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:miner/level_10",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_pickaxe"
+    },
+    "title": "Spărgător de Rocă",
+    "description": "Job miner - Nivel 20",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

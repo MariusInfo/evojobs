@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:fisherman/level_25",
+  "display": {
+    "icon": {
+      "item": "minecraft:fishing_rod"
+    },
+    "title": "Pescar de Mare",
+    "description": "Job fisherman - Nivel 30",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

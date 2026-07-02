@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:miner/level_40",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_pickaxe"
+    },
+    "title": "Maestrul Minereurilor",
+    "description": "Job miner - Nivel 50",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

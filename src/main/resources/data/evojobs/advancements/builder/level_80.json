@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:builder/level_75",
+  "display": {
+    "icon": {
+      "item": "minecraft:bricks"
+    },
+    "title": "Creator de Orașe",
+    "description": "Job builder - Nivel 80",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

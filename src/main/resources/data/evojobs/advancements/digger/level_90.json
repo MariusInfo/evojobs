@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:digger/level_80",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_shovel"
+    },
+    "title": "Seismolog",
+    "description": "Job digger - Nivel 90",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

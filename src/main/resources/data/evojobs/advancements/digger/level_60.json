@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:digger/level_50",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_shovel"
+    },
+    "title": "Făcător de Cratere",
+    "description": "Job digger - Nivel 60",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

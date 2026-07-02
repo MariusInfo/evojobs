@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:somer/level_60",
+  "display": {
+    "icon": {
+      "item": "minecraft:painting"
+    },
+    "title": "Pensionar Special",
+    "description": "Job somer - Nivel 70",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

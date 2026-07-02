@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:root",
+  "display": {
+    "icon": {
+      "item": "minecraft:wheat"
+    },
+    "title": "§eCarieră: Farmer",
+    "description": "Începe-ți aventura ca farmer!",
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "auto": {
+      "trigger": "minecraft:tick"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:somer/level_90",
+  "display": {
+    "icon": {
+      "item": "minecraft:painting"
+    },
+    "title": "Zeul Inactivității",
+    "description": "Job somer - Nivel 100",
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

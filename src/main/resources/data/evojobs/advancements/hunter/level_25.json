@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:hunter/level_20",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_sword"
+    },
+    "title": "Spaima Nopții",
+    "description": "Job hunter - Nivel 25",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

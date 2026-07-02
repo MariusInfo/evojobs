@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:miner/level_70",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_pickaxe"
+    },
+    "title": "Inimă de Piatră",
+    "description": "Job miner - Nivel 75",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

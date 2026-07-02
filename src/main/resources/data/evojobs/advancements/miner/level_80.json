@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:miner/level_75",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_pickaxe"
+    },
+    "title": "Distrugător de Peșteri",
+    "description": "Job miner - Nivel 80",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

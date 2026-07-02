@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:fisherman/level_40",
+  "display": {
+    "icon": {
+      "item": "minecraft:fishing_rod"
+    },
+    "title": "Maestrul Undiței",
+    "description": "Job fisherman - Nivel 50",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:woodcutter/level_60",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_axe"
+    },
+    "title": "Maestrul Pădurilor",
+    "description": "Job woodcutter - Nivel 70",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:trader/level_40",
+  "display": {
+    "icon": {
+      "item": "minecraft:emerald"
+    },
+    "title": "Lupul de pe Wall Street",
+    "description": "Job trader - Nivel 50",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

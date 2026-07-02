@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:root",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_sword"
+    },
+    "title": "§eCarieră: Hunter",
+    "description": "Începe-ți aventura ca hunter!",
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "auto": {
+      "trigger": "minecraft:tick"
+    }
+  }
+}

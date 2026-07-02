@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:fierar/level_30",
+  "display": {
+    "icon": {
+      "item": "minecraft:anvil"
+    },
+    "title": "Ucenicul Nicovalei",
+    "description": "Job fierar - Nivel 40",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

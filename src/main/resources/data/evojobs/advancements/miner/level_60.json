@@ -1,0 +1,19 @@
+{
+  "parent": "evojobs:miner/level_50",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_pickaxe"
+    },
+    "title": "Căutător de Comori",
+    "description": "Job miner - Nivel 60",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}
