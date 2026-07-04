@@ -120,7 +120,7 @@ public class EvoJobsCommands {
 
             if (hitResult.getType() == HitResult.Type.BLOCK) {
                 BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
-                JobStationManager.get().addStation(pos);
+                JobStationManager.get().addStation(player.level(), pos);
                 player.sendSystemMessage(Component.literal("§a[EvoJobs] Stație de Job salvată cu succes la: " + pos.toShortString()));
             } else {
                 player.sendSystemMessage(Component.literal("§c[EvoJobs] Trebuie să te uiți la un bloc pentru a-l face stație de job!"));

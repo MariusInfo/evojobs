@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.*;
@@ -27,13 +28,17 @@ public class JobStationManager {
 
     public static JobStationManager get() { return INSTANCE; }
 
-    public void addStation(BlockPos pos) {
-        stations.add(pos.toShortString());
+    public void addStation(Level level, BlockPos pos) {
+        stations.add(getStationKey(level, pos));
         save();
     }
 
-    public boolean isStation(BlockPos pos) {
-        return stations.contains(pos.toShortString());
+    public boolean isStation(Level level, BlockPos pos) {
+        return stations.contains(getStationKey(level, pos)) || stations.contains(pos.toShortString());
+    }
+
+    private String getStationKey(Level level, BlockPos pos) {
+        return level.dimension().location() + ":" + pos.toShortString();
     }
 
     public void save() {

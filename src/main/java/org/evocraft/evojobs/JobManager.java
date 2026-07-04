@@ -20,12 +20,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class JobManager {
     private static JobManager INSTANCE;
+    private static final long DIRTY_SAVE_INTERVAL_MS = 5000L;
 
     private final Map<UUID, Map<String, JobData>> playerJobs = new HashMap<>();
+    private final Set<String> dirtyJobSaves = ConcurrentHashMap.newKeySet();
+    private long lastDirtyFlushMs = 0L;
 
     public JobManager() {
         loadAllFromDatabase();
@@ -59,11 +63,11 @@ public class JobManager {
         } catch (Exception e) { e.printStackTrace(); }
     }
 
-    public void saveJobToDatabase(UUID uuid, String jobId, JobData data) {
+    public boolean saveJobToDatabase(UUID uuid, String jobId, JobData data) {
         String query = "REPLACE INTO player_jobs (uuid, player_name, job_id, level, xp, is_active) VALUES (?, ?, ?, ?, ?, ?)";
 
         Connection conn = DatabaseManager.get().getConnection();
-        if (conn == null) return;
+        if (conn == null) return false;
 
         String playerName = PlayerStatsManager.get().getNameByUUID(uuid);
         if (playerName == null || playerName.equals("Unknown") || playerName.equals("Necunoscut")) {
@@ -80,7 +84,62 @@ public class JobManager {
             stmt.setDouble(5, data.xp);
             stmt.setBoolean(6, data.isActive);
             stmt.executeUpdate();
+            return true;
         } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
+
+    private String saveKey(UUID uuid, String jobId) {
+        return uuid + "|" + jobId;
+    }
+
+    private void saveJobNowOrQueue(UUID uuid, String jobId, JobData data) {
+        if (!saveJobToDatabase(uuid, jobId, data)) {
+            queueJobSave(uuid, jobId);
+        }
+    }
+
+    private void queueJobSave(UUID uuid, String jobId) {
+        dirtyJobSaves.add(saveKey(uuid, jobId));
+    }
+
+    public void flushDirtySaves(boolean force) {
+        if (dirtyJobSaves.isEmpty()) return;
+
+        long now = System.currentTimeMillis();
+        if (!force && now - lastDirtyFlushMs < DIRTY_SAVE_INTERVAL_MS) return;
+        lastDirtyFlushMs = now;
+
+        List<String> keysToSave = new ArrayList<>(dirtyJobSaves);
+        for (String key : keysToSave) {
+            try {
+                String[] parts = key.split("\\|", 2);
+                if (parts.length != 2) {
+                    dirtyJobSaves.remove(key);
+                    continue;
+                }
+
+                UUID uuid = UUID.fromString(parts[0]);
+                String jobId = parts[1];
+                Map<String, JobData> history = playerJobs.get(uuid);
+                boolean saved = true;
+                if (history != null) {
+                    JobData data = history.get(jobId);
+                    if (data != null) {
+                        saved = saveJobToDatabase(uuid, jobId, data);
+                    }
+                }
+                if (saved) {
+                    dirtyJobSaves.remove(key);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void shutdown() {
+        flushDirtySaves(true);
     }
 
     public Map<String, JobData> getAllJobsHistory(UUID player) {
@@ -146,7 +205,7 @@ public class JobManager {
             history.put(jobName, jobData);
         }
 
-        saveJobToDatabase(uuid, jobName, jobData);
+        saveJobNowOrQueue(uuid, jobName, jobData);
 
         ServerPlayer player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(uuid);
         if (player != null) {
@@ -161,7 +220,7 @@ public class JobManager {
         if (history.containsKey(jobName)) {
             JobData jobData = history.get(jobName);
             jobData.isActive = false;
-            saveJobToDatabase(playerUUID, jobName, jobData);
+            saveJobNowOrQueue(playerUUID, jobName, jobData);
 
             ServerPlayer player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerUUID);
             if (player != null) syncJobsToClient(player);
@@ -185,7 +244,7 @@ public class JobManager {
         data.level = newLevel;
         data.xp = 0;
 
-        saveJobToDatabase(uuid, jobName, data);
+        saveJobNowOrQueue(uuid, jobName, data);
 
         ServerPlayer player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(uuid);
         if (player != null) {
@@ -266,7 +325,7 @@ public class JobManager {
             }
         }
 
-        saveJobToDatabase(uuid, jobName, data);
+        queueJobSave(uuid, jobName);
         return leveledUp;
     }
 
@@ -312,7 +371,7 @@ public class JobManager {
                     }
 
                     if (leveledUp) {
-                        saveJobToDatabase(player.getUUID(), jobName, data);
+                        saveJobNowOrQueue(player.getUUID(), jobName, data);
                         player.sendSystemMessage(Component.literal("§a[Job] The system updated your remaining level for §e" + jobName + "§a! You are now level §e" + data.level));
                     }
                     syncJobScoreboard(player, jobName, data.level);

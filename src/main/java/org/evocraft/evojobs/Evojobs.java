@@ -2,9 +2,7 @@ package org.evocraft.evojobs;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent; // Import adaugat
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -71,14 +69,11 @@ public class Evojobs {
     @SubscribeEvent
     public void onServerStopping(ServerStoppingEvent event) {
         LOGGER.info("[EvoJobs] Serverul se opreste. Salvam datele ramase in memorie...");
-        AntiExploitManager.get().shutdown();
-    }
-
-    @SubscribeEvent
-    public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            JobManager.get().onPlayerJoin(player);
+        QuestManager.shutdown();
+        if (JobManager.get() != null) {
+            JobManager.get().shutdown();
         }
+        AntiExploitManager.get().shutdown();
     }
 
     @SubscribeEvent

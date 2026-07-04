@@ -215,7 +215,7 @@ public class JobEvents {
         if (!event.getLevel().isClientSide() && event.getEntity() instanceof ServerPlayer player) {
             net.minecraft.core.BlockPos pos = event.getPos();
 
-            if (JobStationManager.get().isStation(pos)) {
+            if (JobStationManager.get().isStation(player.level(), pos)) {
                 event.setCanceled(true);
 
                 player.openMenu(new MenuProvider() {
@@ -292,6 +292,16 @@ public class JobEvents {
                         e.printStackTrace();
                     }
                 }));
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onServerTick(net.minecraftforge.event.TickEvent.ServerTickEvent event) {
+        if (event.phase == net.minecraftforge.event.TickEvent.Phase.END && event.getServer().getTickCount() % 100 == 0) {
+            JobManager manager = JobManager.get();
+            if (manager != null) {
+                manager.flushDirtySaves(false);
             }
         }
     }

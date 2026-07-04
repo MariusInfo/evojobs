@@ -4,6 +4,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -20,6 +21,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @Mod.EventBusSubscriber(modid = Evojobs.MODID)
 public class QuestManager {
@@ -64,8 +68,14 @@ public class QuestManager {
     public static final List<QuestTemplate> POOL = new ArrayList<>();
     public static final List<DailyQuest> TODAYS_QUESTS = new ArrayList<>();
     private static long currentSeed = -1;
+    private static ExecutorService questDbExecutor;
 
-    public static void initialize() {
+    public static synchronized void initialize() {
+        POOL.clear();
+        TODAYS_QUESTS.clear();
+        currentSeed = -1;
+        ensureQuestDbExecutor();
+
         // ===============================================
         // ⛏️ MINER (15 Quests)
         // ===============================================
@@ -224,6 +234,32 @@ public class QuestManager {
         generateQuestsForToday();
     }
 
+    private static synchronized ExecutorService ensureQuestDbExecutor() {
+        if (questDbExecutor == null || questDbExecutor.isShutdown()) {
+            questDbExecutor = Executors.newSingleThreadExecutor(task -> {
+                Thread thread = new Thread(task, "EvoJobs-QuestDB");
+                thread.setDaemon(true);
+                return thread;
+            });
+        }
+        return questDbExecutor;
+    }
+
+    public static void shutdown() {
+        ExecutorService executor = questDbExecutor;
+        if (executor == null) return;
+
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
     public static void generateQuestsForToday() {
         long today = LocalDate.now().toEpochDay();
         if (currentSeed == today && !TODAYS_QUESTS.isEmpty()) return;
@@ -270,13 +306,17 @@ public class QuestManager {
     }
 
     private static void addProgress(ServerPlayer player, int questIndex, int amount, DailyQuest quest) {
-        new Thread(() -> {
+        UUID playerUuid = player.getUUID();
+        MinecraftServer server = player.getServer();
+        long questDate = currentSeed;
+
+        ensureQuestDbExecutor().execute(() -> {
             synchronized (DatabaseManager.get()) {
                 try {
                     Connection conn = DatabaseManager.get().getConnection();
                     if (conn == null || conn.isClosed()) return;
 
-                    String uuid = player.getUUID().toString();
+                    String uuid = playerUuid.toString();
                     int currentProg = 0;
                     boolean claimed = false;
 
@@ -285,14 +325,23 @@ public class QuestManager {
                         try (ResultSet rs = checkStmt.executeQuery()) {
                             if (rs.next()) {
                                 long dbDate = rs.getLong("date_id");
-                                if (dbDate == currentSeed) {
+                                if (dbDate == questDate) {
                                     currentProg = rs.getInt("q" + questIndex + "_prog");
                                     claimed = rs.getBoolean("q" + questIndex + "_claimed");
                                 } else {
-                                    conn.createStatement().execute("UPDATE daily_quests SET date_id=" + currentSeed + ", q0_prog=0, q0_claimed=FALSE, q1_prog=0, q1_claimed=FALSE, q2_prog=0, q2_claimed=FALSE, q3_prog=0, q3_claimed=FALSE, q4_prog=0, q4_claimed=FALSE WHERE uuid='" + uuid + "'");
+                                    try (PreparedStatement resetStmt = conn.prepareStatement(
+                                            "UPDATE daily_quests SET date_id=?, q0_prog=0, q0_claimed=FALSE, q1_prog=0, q1_claimed=FALSE, q2_prog=0, q2_claimed=FALSE, q3_prog=0, q3_claimed=FALSE, q4_prog=0, q4_claimed=FALSE WHERE uuid=?")) {
+                                        resetStmt.setLong(1, questDate);
+                                        resetStmt.setString(2, uuid);
+                                        resetStmt.executeUpdate();
+                                    }
                                 }
                             } else {
-                                conn.createStatement().execute("INSERT INTO daily_quests (uuid, date_id) VALUES ('" + uuid + "', " + currentSeed + ")");
+                                try (PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO daily_quests (uuid, date_id) VALUES (?, ?)")) {
+                                    insertStmt.setString(1, uuid);
+                                    insertStmt.setLong(2, questDate);
+                                    insertStmt.executeUpdate();
+                                }
                             }
                         }
                     }
@@ -308,23 +357,31 @@ public class QuestManager {
                     }
 
                     if (newProg >= quest.requiredAmount && currentProg < quest.requiredAmount) {
-                        conn.createStatement().execute("UPDATE daily_quests SET q" + questIndex + "_claimed = TRUE WHERE uuid = '" + uuid + "'");
+                        try (PreparedStatement claimStmt = conn.prepareStatement("UPDATE daily_quests SET q" + questIndex + "_claimed = TRUE WHERE uuid = ?")) {
+                            claimStmt.setString(1, uuid);
+                            claimStmt.executeUpdate();
+                        }
 
-                        player.getServer().execute(() -> {
-                            EconomyManager.get().addBalance(player.getUUID(), quest.rewardMoney);
-                            JobManager.get().addXp(player.getUUID(), quest.template.jobId, quest.rewardXp);
-                            JobManager.get().syncJobsToClient(player);
+                        if (server != null) {
+                            server.execute(() -> {
+                                ServerPlayer onlinePlayer = server.getPlayerList().getPlayer(playerUuid);
+                                if (onlinePlayer == null) return;
 
-                            player.connection.send(new ClientboundSetTitlesAnimationPacket(10, 70, 20));
-                            player.connection.send(new ClientboundSetSubtitleTextPacket(Component.literal("§a+" + (int)quest.rewardMoney + " Lei §f| §b+" + (int)quest.rewardXp + " XP")));
-                            player.connection.send(new ClientboundSetTitleTextPacket(Component.literal("§e§lDAILY QUEST COMPLETED!")));
-                            player.level().playSound(null, player.blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.MASTER, 1.0f, 1.0f);
-                        });
+                                EconomyManager.get().addBalance(playerUuid, quest.rewardMoney);
+                                JobManager.get().addXp(playerUuid, quest.template.jobId, quest.rewardXp);
+                                JobManager.get().syncJobsToClient(onlinePlayer);
+
+                                onlinePlayer.connection.send(new ClientboundSetTitlesAnimationPacket(10, 70, 20));
+                                onlinePlayer.connection.send(new ClientboundSetSubtitleTextPacket(Component.literal("§a+" + (int)quest.rewardMoney + " Lei §f| §b+" + (int)quest.rewardXp + " XP")));
+                                onlinePlayer.connection.send(new ClientboundSetTitleTextPacket(Component.literal("§e§lDAILY QUEST COMPLETED!")));
+                                onlinePlayer.level().playSound(null, onlinePlayer.blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.MASTER, 1.0f, 1.0f);
+                            });
+                        }
                     }
 
                 } catch (Exception e) { e.printStackTrace(); }
             }
-        }).start();
+        });
     }
 
     public static int[] getPlayerProgress(ServerPlayer player) {
