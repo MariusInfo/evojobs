@@ -8,10 +8,12 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import org.evocraft.evojobs.JobMenu;
+import org.evocraft.evojobs.JobProgressionService;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class JobScreen extends AbstractContainerScreen<JobMenu> {
 
@@ -62,7 +64,7 @@ public class JobScreen extends AbstractContainerScreen<JobMenu> {
 
         btnClose = new CustomButton("Close", 0, 0, 70, 20, this::onClose);
 
-        btnAction = new CustomButton("§aGET HIRED", 0, 0, 160, 25, () -> {
+        btnAction = new CustomButton("\u00A7aGET HIRED", 0, 0, 160, 25, () -> {
             if (selectedVisualSlot != -1) {
                 this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, selectedVisualSlot);
             }
@@ -135,6 +137,17 @@ public class JobScreen extends AbstractContainerScreen<JobMenu> {
             g.drawString(this.font, (currentPage + 1) + "/" + (maxPages + 1), this.leftPos + 35, this.topPos + this.imageHeight - 22, BORDER_COLOR, false);
         }
 
+        CompoundTag totalsTag = getTotalsTag();
+        if (totalsTag != null) {
+            String totalText = "Total Job Level: " + formatLong(totalsTag.getLong("Total_Job_Level"));
+            String synergyText = "Synergy: " + formatLong(totalsTag.getLong("Synergy_Level"));
+            g.pose().pushPose();
+            g.pose().translate(this.leftPos + 15, this.topPos + this.imageHeight - 43, 0);
+            g.pose().scale(0.85f, 0.85f, 1.0f);
+            g.drawString(this.font, totalText + "  |  " + synergyText, 0, 0, TEXT_COLOR, false);
+            g.pose().popPose();
+        }
+
         btnPrev.x = this.leftPos + 75; btnPrev.y = this.topPos + this.imageHeight - 28;
         btnNext.x = this.leftPos + 205; btnNext.y = this.topPos + this.imageHeight - 28;
         btnClose.x = this.leftPos + 415; btnClose.y = this.topPos + this.imageHeight - 28;
@@ -167,7 +180,7 @@ public class JobScreen extends AbstractContainerScreen<JobMenu> {
 
             boolean isActive = tag.getBoolean("Job_Active");
             String name = tag.getString("Job_Name");
-            int level = tag.getInt("Job_Level");
+            long level = tag.getLong("Job_Level");
             double xp = tag.getDouble("Job_XP");
             double reqXp = tag.getDouble("Job_ReqXP");
 
@@ -202,7 +215,7 @@ public class JobScreen extends AbstractContainerScreen<JobMenu> {
             g.pose().translate(cx + 42, cy + 38, 0);
             g.pose().scale(0.95f, 0.95f, 1.0f);
             if (isActive) {
-                g.drawString(this.font, "Level: " + level, 0, 0, TEXT_COLOR, false);
+                g.drawString(this.font, "Level: " + formatLong(level), 0, 0, TEXT_COLOR, false);
             } else {
                 g.drawString(this.font, "Unemployed", 0, 0, 0xFFAAAAAA, false);
             }
@@ -226,7 +239,14 @@ public class JobScreen extends AbstractContainerScreen<JobMenu> {
                 String name = tag.getString("Job_Name");
                 String desc = tag.getString("Job_Desc");
                 boolean isActive = tag.getBoolean("Job_Active");
-                int level = tag.getInt("Job_Level");
+                long level = tag.getLong("Job_Level");
+                double xp = tag.getDouble("Job_XP");
+                double reqXp = tag.getDouble("Job_ReqXP");
+                double xpMultiplier = tag.getDouble("Job_XPMult");
+                double moneyMultiplier = tag.getDouble("Job_MoneyMult");
+                String attributeName = tag.getString("Job_AttrName");
+                double attributePower = tag.getDouble("Job_AttrPower");
+                double attributeEffect = tag.getDouble("Job_AttrEffect");
 
                 g.drawCenteredString(this.font, "JOB INFO: " + name.toUpperCase(), infoX + infoPanelWidth / 2, infoY + 10, BORDER_COLOR);
 
@@ -255,39 +275,43 @@ public class JobScreen extends AbstractContainerScreen<JobMenu> {
 
                 if (isActive) {
                     LocalRankInfo currentRank = getLocalRankInfo(jobId, level);
-                    g.drawString(this.font, "RANK: §6" + currentRank.title.toUpperCase() + " §8(Lvl. " + level + ")", 0, 0, TEXT_COLOR, false);
-                    g.drawString(this.font, "Extra Job Money: §a+" + (int)currentRank.boostPercent + "%", 0, 10, TEXT_COLOR, false);
+                    g.drawString(this.font, "RANK: \u00A76" + currentRank.title.toUpperCase() + " \u00A78(Lvl. " + formatLong(level) + ")", 0, 0, TEXT_COLOR, false);
+                    g.drawString(this.font, "XP: \u00A7b" + formatNumber(xp) + " / " + formatNumber(reqXp), 0, 10, TEXT_COLOR, false);
+                    g.drawString(this.font, "XP Multiplier: \u00A7bx" + formatMultiplier(xpMultiplier), 0, 20, TEXT_COLOR, false);
+                    g.drawString(this.font, "Money Multiplier: \u00A7ax" + formatMultiplier(moneyMultiplier), 0, 30, TEXT_COLOR, false);
+                    g.drawString(this.font, attributeName + ":", 0, 42, BORDER_COLOR, false);
+                    g.drawString(this.font, formatNumber(attributePower) + " power / " + formatNumber(attributeEffect) + "% effect", 0, 52, TEXT_COLOR, false);
 
                     // ==========================================
                     // LIST OF PERKS (UNLOCKED OR LOCKED)
                     // ==========================================
-                    g.drawString(this.font, "JOB PERKS:", 0, 25, BORDER_COLOR, false);
+                    g.drawString(this.font, "JOB PERKS:", 0, 70, BORDER_COLOR, false);
                     List<PerkInfo> perks = getJobPerks(jobId);
-                    int py = 37;
+                    int py = 82;
                     for (PerkInfo p : perks) {
                         boolean unlocked = level >= p.lvl;
-                        String prefix = unlocked ? "§a✔ " : "§c🔒 ";
+                        String prefix = unlocked ? "\u00A7aOK " : "\u00A7cLOCK ";
                         int color = unlocked ? 0xFFFFFFFF : 0xFFAAAAAA;
                         g.drawString(this.font, prefix + "[Lvl. " + p.lvl + "] " + p.shortText, 0, py, color, false);
                         py += 11;
                     }
 
-                    btnAction.text = "§cRESIGN";
+                    btnAction.text = "\u00A7cRESIGN";
                 } else {
-                    g.drawString(this.font, "§cYou are not hired.", 0, 0, TEXT_COLOR, false);
-                    g.drawString(this.font, "§7Get hired to unlock", 0, 12, TEXT_COLOR, false);
-                    g.drawString(this.font, "§7ranks, extra money and powers!", 0, 22, TEXT_COLOR, false);
+                    g.drawString(this.font, "\u00A7cYou are not hired.", 0, 0, TEXT_COLOR, false);
+                    g.drawString(this.font, "Level: \u00A7f" + formatLong(level), 0, 12, TEXT_COLOR, false);
+                    g.drawString(this.font, attributeName + ": \u00A7f" + formatNumber(attributePower), 0, 24, TEXT_COLOR, false);
 
                     // Shows the perks even if not hired (all grayed out)
-                    g.drawString(this.font, "JOB PERKS:", 0, 37, BORDER_COLOR, false);
+                    g.drawString(this.font, "JOB PERKS:", 0, 42, BORDER_COLOR, false);
                     List<PerkInfo> perks = getJobPerks(jobId);
-                    int py = 49;
+                    int py = 54;
                     for (PerkInfo p : perks) {
-                        g.drawString(this.font, "§c🔒 [Lvl. " + p.lvl + "] " + p.shortText, 0, py, 0xFFAAAAAA, false);
+                        g.drawString(this.font, "\u00A7cLOCK [Lvl. " + p.lvl + "] " + p.shortText, 0, py, 0xFFAAAAAA, false);
                         py += 11;
                     }
 
-                    btnAction.text = "§aGET HIRED";
+                    btnAction.text = "\u00A7aGET HIRED";
                 }
                 g.pose().popPose();
 
@@ -298,9 +322,28 @@ public class JobScreen extends AbstractContainerScreen<JobMenu> {
     }
 
     private String formatNumber(double num) {
-        if (num >= 1_000_000) return String.format("%.1fM", num / 1_000_000);
-        if (num >= 1_000) return String.format("%.1fk", num / 1_000);
-        return String.valueOf((int)num);
+        return JobProgressionService.formatNumber(num);
+    }
+
+    private String formatLong(long num) {
+        if (num >= 1_000_000_000L) return String.format(Locale.US, "%.2fB", num / 1_000_000_000.0);
+        if (num >= 1_000_000L) return String.format(Locale.US, "%.2fM", num / 1_000_000.0);
+        if (num >= 1_000L) return String.format(Locale.US, "%,d", num);
+        return Long.toString(num);
+    }
+
+    private String formatMultiplier(double multiplier) {
+        if (!Double.isFinite(multiplier)) return "1.00";
+        return String.format(Locale.US, "%.2f", multiplier);
+    }
+
+    private CompoundTag getTotalsTag() {
+        for (Slot slot : this.menu.slots) {
+            if (slot.hasItem() && slot.getItem().hasTag()) {
+                return slot.getItem().getTag();
+            }
+        }
+        return null;
     }
 
     @Override
@@ -425,16 +468,16 @@ public class JobScreen extends AbstractContainerScreen<JobMenu> {
     }
 
     private static class LocalRankInfo {
-        String title; double boostPercent; int nextLevelReq;
-        LocalRankInfo(String t, double b, int n) { title = t; boostPercent = b; nextLevelReq = n; }
+        String title; double boostPercent; long nextLevelReq;
+        LocalRankInfo(String t, double b, long n) { title = t; boostPercent = b; nextLevelReq = n; }
     }
 
-    private LocalRankInfo getLocalRankInfo(String jobId, int level) {
+    private LocalRankInfo getLocalRankInfo(String jobId, long level) {
         String title = "Amateur";
         double boost = 0.0;
-        int nextReq = 10;
+        long nextReq = 10;
 
-        if (level >= 100) { boost = 200.0; nextReq = 999; }
+        if (level >= 100) { boost = 200.0; nextReq = Long.MAX_VALUE; }
         else if (level >= 75) { boost = 100.0; nextReq = 100; }
         else if (level >= 50) { boost = 50.0; nextReq = 75; }
         else if (level >= 25) { boost = 25.0; nextReq = 50; }

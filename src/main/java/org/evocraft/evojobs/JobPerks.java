@@ -40,12 +40,12 @@ public class JobPerks {
     private static final UUID REACH_UUID = UUID.fromString("b3a9c7d4-1f2e-4d5c-8a9b-0c1d2e3f4a5b");
     private static boolean isPerkAction = false;
 
-    public static int getJobLevel(ServerPlayer player, String jobId) {
+    public static long getJobLevel(ServerPlayer player, String jobId) {
         Map<String, JobData> jobs = JobManager.get().getActiveJobs(player.getUUID());
         if (jobs != null && jobs.containsKey(jobId)) {
-            return jobs.get(jobId).level;
+            return Math.max(1L, jobs.get(jobId).level);
         }
-        return 0;
+        return 0L;
     }
 
     // ==========================================
@@ -83,7 +83,7 @@ public class JobPerks {
         boolean holdingBlock = mainHand.getItem() instanceof BlockItem;
 
         // ⛏️ MINER
-        int minerLvl = getJobLevel(player, "miner");
+        long minerLvl = getJobLevel(player, "miner");
         if (holdingPickaxe) {
             if (minerLvl >= 75) player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 60, 1, false, false));
             else if (minerLvl >= 25) player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 60, 0, false, false));
@@ -91,7 +91,7 @@ public class JobPerks {
         if (minerLvl >= 100 && player.getY() < 50) player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 260, 0, false, false));
 
         // 🪓 WOODCUTTER
-        int woodLvl = getJobLevel(player, "woodcutter");
+        long woodLvl = getJobLevel(player, "woodcutter");
         if (holdingAxe) {
             if (woodLvl >= 75) player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 60, 1, false, false));
             else if (woodLvl >= 25) player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 60, 0, false, false));
@@ -102,14 +102,14 @@ public class JobPerks {
         }
 
         // 🪚 DIGGER
-        int diggerLvl = getJobLevel(player, "digger");
+        long diggerLvl = getJobLevel(player, "digger");
         if (holdingShovel) {
             if (diggerLvl >= 75) player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 60, 1, false, false));
             else if (diggerLvl >= 25) player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 60, 0, false, false));
         }
 
         // ⚔️ HUNTER
-        int hunterLvl = getJobLevel(player, "hunter");
+        long hunterLvl = getJobLevel(player, "hunter");
         if (holdingSword) {
             if (hunterLvl >= 25) {
                 player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 60, 0, false, false));
@@ -119,7 +119,7 @@ public class JobPerks {
         }
 
         // 🌾 FARMER
-        int farmerLvl = getJobLevel(player, "farmer");
+        long farmerLvl = getJobLevel(player, "farmer");
         if (farmerLvl >= 25 && player.level().getBlockState(player.blockPosition().below()).is(Blocks.FARMLAND)) {
             player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 60, 0, false, false));
         }
@@ -131,7 +131,7 @@ public class JobPerks {
         }
 
         // 🎣 FISHERMAN
-        int fishLvl = getJobLevel(player, "fisherman");
+        long fishLvl = getJobLevel(player, "fisherman");
         if (fishLvl >= 25) player.addEffect(new MobEffectInstance(MobEffects.LUCK, 60, fishLvl >= 75 ? 2 : 0, false, false));
         if (fishLvl >= 50 && player.isInWater()) {
             player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 60, 0, false, false));
@@ -139,7 +139,7 @@ public class JobPerks {
         }
 
         // 🧱 BUILDER
-        int buildLvl = getJobLevel(player, "builder");
+        long buildLvl = getJobLevel(player, "builder");
         if (holdingBlock) {
             if (buildLvl >= 25) player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 260, 0, false, false));
             if (buildLvl >= 75) player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 60, 0, false, false));
@@ -151,7 +151,7 @@ public class JobPerks {
         }
 
         // 💎 TRADER
-        int traderLvl = getJobLevel(player, "trader");
+        long traderLvl = getJobLevel(player, "trader");
         if (traderLvl >= 50) player.addEffect(new MobEffectInstance(MobEffects.HERO_OF_THE_VILLAGE, 60, 2, false, false));
         else if (traderLvl >= 25) player.addEffect(new MobEffectInstance(MobEffects.HERO_OF_THE_VILLAGE, 60, 0, false, false));
 
@@ -160,7 +160,7 @@ public class JobPerks {
         // We scan the inventory and remove the penalty NBT (RepairCost).
         // Without this NBT, Minecraft always thinks your item is untouched!
         // =======================================================
-        int smithLvl = getJobLevel(player, "fierar");
+        long smithLvl = getJobLevel(player, "fierar");
         if (smithLvl >= 100) {
             for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
                 ItemStack stack = player.getInventory().getItem(i);
@@ -183,7 +183,7 @@ public class JobPerks {
         ServerLevel level = (ServerLevel) player.level();
 
         // 🌾 FARMER
-        int farmerLvl = getJobLevel(player, "farmer");
+        long farmerLvl = getJobLevel(player, "farmer");
         if (farmerLvl >= 50 && state.getBlock() instanceof CropBlock crop && crop.isMaxAge(state)) {
             Item seedItem = crop.getCloneItemStack(level, pos, state).getItem();
             int seedSlot = player.getInventory().findSlotMatchingItem(new ItemStack(seedItem));
@@ -200,7 +200,7 @@ public class JobPerks {
         }
 
         // ⛏️ MINER
-        int minerLvl = getJobLevel(player, "miner");
+        long minerLvl = getJobLevel(player, "miner");
         if (minerLvl >= 50 && player.isCrouching() && state.is(Tags.Blocks.ORES)) {
             isPerkAction = true;
             breakGroup(level, pos, state.getBlock(), player, 16);
@@ -211,7 +211,7 @@ public class JobPerks {
         }
 
         // 🪓 WOODCUTTER
-        int woodLvl = getJobLevel(player, "woodcutter");
+        long woodLvl = getJobLevel(player, "woodcutter");
         if (woodLvl >= 50 && player.isCrouching() && state.is(BlockTags.LOGS)) {
             isPerkAction = true;
             breakGroup(level, pos, state.getBlock(), player, 32);
@@ -238,7 +238,7 @@ public class JobPerks {
         }
 
         // 🪚 DIGGER
-        int digLvl = getJobLevel(player, "digger");
+        long digLvl = getJobLevel(player, "digger");
         if (digLvl >= 50 && player.isCrouching() && (state.is(BlockTags.DIRT) || state.is(BlockTags.SAND) || state.is(Tags.Blocks.GRAVEL))) {
             isPerkAction = true;
             for(int x = -1; x <= 1; x++) for(int z = -1; z <= 1; z++) {
@@ -253,7 +253,7 @@ public class JobPerks {
         }
 
         // 🗜️ BLACKSMITH (L25 Passive Unbreaking)
-        int smithLvl = getJobLevel(player, "fierar");
+        long smithLvl = getJobLevel(player, "fierar");
         if (smithLvl >= 25 && player.getMainHandItem().isDamageableItem() && Math.random() < 0.15) {
             ItemStack hand = player.getMainHandItem();
             if (hand.getDamageValue() > 0) hand.setDamageValue(hand.getDamageValue() - 1);
@@ -349,7 +349,7 @@ public class JobPerks {
     @SubscribeEvent
     public static void onAnvilRepair(AnvilRepairEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            int fierarLvl = getJobLevel(player, "fierar");
+            long fierarLvl = getJobLevel(player, "fierar");
 
             // L50: Solid Anvil (20%)
             if (fierarLvl >= 50 && Math.random() < 0.20) {
@@ -372,7 +372,7 @@ public class JobPerks {
     @SubscribeEvent
     public static void onCraftItem(PlayerEvent.ItemCraftedEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        int craftLvl = getJobLevel(player, "crafter");
+        long craftLvl = getJobLevel(player, "crafter");
 
         if (craftLvl >= 75 && Math.random() < 0.10) {
             for (int i = 0; i < event.getInventory().getContainerSize(); i++) {
@@ -398,7 +398,7 @@ public class JobPerks {
     @SubscribeEvent
     public static void onItemFished(ItemFishedEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            int fishLvl = getJobLevel(player, "fisherman");
+            long fishLvl = getJobLevel(player, "fisherman");
             if (fishLvl >= 100 && Math.random() < 0.05) {
                 event.getDrops().add(new ItemStack(Items.ENCHANTED_BOOK));
                 player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§b[Fisherman] You fished a treasure of the sea!"));

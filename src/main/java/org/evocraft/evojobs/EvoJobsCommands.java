@@ -1,7 +1,7 @@
 package org.evocraft.evojobs;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -36,7 +36,7 @@ public class EvoJobsCommands {
                 .then(Commands.literal("setlevel")
                         .then(Commands.argument("jucator", EntityArgument.player())
                                 .then(Commands.argument("job", StringArgumentType.word())
-                                        .then(Commands.argument("nivel", IntegerArgumentType.integer(1))
+                                        .then(Commands.argument("nivel", LongArgumentType.longArg(1L))
                                                 .executes(EvoJobsCommands::setLevel)
                                         )
                                 )
@@ -56,7 +56,7 @@ public class EvoJobsCommands {
         try {
             ServerPlayer target = EntityArgument.getPlayer(context, "jucator");
             String job = StringArgumentType.getString(context, "job").toLowerCase();
-            int level = IntegerArgumentType.getInteger(context, "nivel");
+            long level = LongArgumentType.getLong(context, "nivel");
 
             if (JobConfigManager.get().getJob(job) == null) {
                 context.getSource().sendFailure(Component.literal("Jobul '" + job + "' nu există!"));

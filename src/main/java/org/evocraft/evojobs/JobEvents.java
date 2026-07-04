@@ -1,7 +1,9 @@
 package org.evocraft.evojobs;
 
 import org.evocraft.evocore.data.EconomyManager;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
@@ -75,7 +77,10 @@ public class JobEvents {
                 if (block instanceof CocoaBlock && state.getValue(CocoaBlock.AGE) < 2) return;
 
                 AntiExploitManager.get().isExploitAndRemove(player.level(), event.getPos());
-                if (key != null) processJobAction(player, "BREAK", key.toString(), 1.0, "farmer");
+                if (key != null) {
+                    processJobAction(player, "BREAK", key.toString(), 1.0, "farmer");
+                    applyBlockFortuneAttribute(player, "farmer", state, event.getPos());
+                }
                 return;
             }
 
@@ -96,20 +101,26 @@ public class JobEvents {
                 if (state.is(BlockTags.MINEABLE_WITH_PICKAXE) || block == Blocks.DEEPSLATE || block == Blocks.COBBLED_DEEPSLATE || block == Blocks.TUFF || block == Blocks.BASALT || block == Blocks.BLACKSTONE || block == Blocks.NETHERRACK) {
                     if (heldItem.getItem() instanceof PickaxeItem || heldItem.is(ItemTags.PICKAXES)) {
                         processJobAction(player, "BREAK", blockId, 1.0, "miner");
+                        if (heldItem.getEnchantmentLevel(Enchantments.SILK_TOUCH) <= 0) {
+                            applyBlockFortuneAttribute(player, "miner", state, event.getPos());
+                        }
                     }
                 }
                 else if (state.is(BlockTags.MINEABLE_WITH_SHOVEL) || block == Blocks.SAND || block == Blocks.RED_SAND || block == Blocks.GRAVEL || block == Blocks.DIRT || block == Blocks.GRASS_BLOCK || block == Blocks.PODZOL || block == Blocks.COARSE_DIRT || block == Blocks.ROOTED_DIRT) {
                     if (heldItem.getItem() instanceof ShovelItem || heldItem.is(ItemTags.SHOVELS)) {
                         processJobAction(player, "BREAK", blockId, 1.0, "digger");
+                        applyBlockFortuneAttribute(player, "digger", state, event.getPos());
                     }
                 }
                 else if (state.is(BlockTags.LOGS) || state.is(BlockTags.MINEABLE_WITH_AXE)) {
                     if (heldItem.getItem() instanceof AxeItem || heldItem.is(ItemTags.AXES)) {
                         processJobAction(player, "BREAK", blockId, 1.0, "woodcutter");
+                        applyBlockFortuneAttribute(player, "woodcutter", state, event.getPos());
                     }
                 }
                 else if (block == Blocks.MELON || block == Blocks.PUMPKIN || block == Blocks.SUGAR_CANE || block == Blocks.CACTUS) {
                     processJobAction(player, "BREAK", blockId, 1.0, "farmer");
+                    applyBlockFortuneAttribute(player, "farmer", state, event.getPos());
                 }
             }
         }
@@ -233,6 +244,34 @@ public class JobEvents {
         }
     }
 
+    private static void applyBlockFortuneAttribute(ServerPlayer player, String jobId, BlockState state, BlockPos pos) {
+        if (!(player.level() instanceof ServerLevel level)) return;
+
+        JobData data = JobManager.get().getActiveJobs(player.getUUID()).get(jobId);
+        if (data == null || !data.isActive) return;
+
+        JobProgressionService.AttributeInfo attribute = JobProgressionService.getJobAttributeInfo(jobId, data.level, player);
+        String type = attribute.type == null ? "" : attribute.type.toUpperCase(java.util.Locale.ROOT);
+        if (!type.equals("MINING_FORTUNE") && !type.equals("HARVEST_FORTUNE") &&
+                !type.equals("WOOD_FORTUNE") && !type.equals("DIGGING_FORTUNE")) {
+            return;
+        }
+
+        double rolls = attribute.effectPercent / 100.0;
+        if (!Double.isFinite(rolls) || rolls <= 0.0) return;
+
+        int guaranteed = (int) Math.floor(rolls);
+        double chance = rolls - guaranteed;
+        int extraDrops = Math.min(guaranteed, 10);
+        if (extraDrops < 10 && player.getRandom().nextDouble() < chance) {
+            extraDrops++;
+        }
+
+        for (int i = 0; i < extraDrops; i++) {
+            Block.dropResources(state, level, pos, null, player, player.getMainHandItem());
+        }
+    }
+
     public static void processJobAction(ServerPlayer player, String actionType, String targetId, double multiplier, String forcedJobId) {
         Map<String, JobData> activeJobs = JobManager.get().getActiveJobs(player.getUUID());
         if (activeJobs.isEmpty()) return;
@@ -253,15 +292,18 @@ public class JobEvents {
 
             if (basePrice > 0) {
                 JobData data = activeJobs.get(jobId);
+                if (data == null) continue;
                 JobManager.RankInfo rankInfo = JobManager.getRankInfo(jobId, data.level);
                 double rankMultiplier = 1.0 + (rankInfo.boostPercent / 100.0);
+                double safeMultiplier = Double.isFinite(multiplier) && multiplier > 0.0 ? multiplier : 0.0;
 
-                double finalMoney = basePrice * multiplier * (1.0 + (data.level * 0.05)) * rankMultiplier;
-                double xpMultiplier = jobId.equals("miner") ? 5.0 : 2.0;
-                double xpGain = (basePrice * xpMultiplier) * multiplier;
+                double baseMoney = basePrice * safeMultiplier;
+                double baseXp = basePrice * JobProgressionService.getBaseXpMultiplier(jobId) * safeMultiplier;
+                double finalMoney = JobProgressionService.calculateScaledMoneyReward(baseMoney, data.level, player, rankMultiplier);
+                double xpGain = JobProgressionService.calculateScaledXpReward(baseXp, data.level, player);
 
-                EconomyManager.get().addBalance(player.getUUID(), finalMoney);
-                JobManager.get().addXp(player.getUUID(), jobId, xpGain);
+                if (finalMoney > 0.0) EconomyManager.get().addBalance(player.getUUID(), finalMoney);
+                if (xpGain > 0.0) JobManager.get().addXp(player.getUUID(), jobId, xpGain);
 
                 // --- ADDED: TRANSMIT THE INFO TO THE QUEST SYSTEM ---
                 org.evocraft.evojobs.quest.QuestManager.onAction(player, jobId, actionType, targetId, (int) Math.max(1, multiplier));
@@ -273,9 +315,9 @@ public class JobEvents {
         }
 
         if (totalMoney > 0) {
-            String moneyFmt = String.format(java.util.Locale.US, "%.2f", totalMoney);
-            String xpFmt = String.format(java.util.Locale.US, "%.1f", totalXp);
-            String rawMsg = "§a+ " + moneyFmt + " Lei §f| §b+ " + xpFmt + " XP §7(" + jobs.toString().trim() + ")";
+            String moneyFmt = JobProgressionService.formatNumber(totalMoney);
+            String xpFmt = JobProgressionService.formatNumber(totalXp);
+            String rawMsg = "\u00A7a+ " + moneyFmt + " Lei \u00A7f| \u00A7b+ " + xpFmt + " XP \u00A77(" + jobs.toString().trim() + ")";
             player.displayClientMessage(Component.literal(rawMsg), true);
             JobManager.get().syncJobsToClient(player);
         }
@@ -314,9 +356,13 @@ public class JobEvents {
                     if (player.isPassenger()) {
                         Map<String, JobData> activeJobs = JobManager.get().getActiveJobs(player.getUUID());
                         if (activeJobs.containsKey("somer")) {
-                            EconomyManager.get().addBalance(player.getUUID(), 0.10);
-                            JobManager.get().addXp(player.getUUID(), "somer", 1.0);
-                            player.displayClientMessage(Component.literal("§a+ 0.10 Lei §f| §b+ 1.0 XP §7(Unemployed)"), true);
+                            JobData somerData = activeJobs.get("somer");
+                            JobManager.RankInfo rankInfo = JobManager.getRankInfo("somer", somerData.level);
+                            double money = JobProgressionService.calculateScaledMoneyReward(0.10, somerData.level, player, 1.0 + (rankInfo.boostPercent / 100.0));
+                            double xp = JobProgressionService.calculateScaledXpReward(1.0, somerData.level, player);
+                            if (money > 0.0) EconomyManager.get().addBalance(player.getUUID(), money);
+                            if (xp > 0.0) JobManager.get().addXp(player.getUUID(), "somer", xp);
+                            player.displayClientMessage(Component.literal("\u00A7a+ " + JobProgressionService.formatNumber(money) + " Lei \u00A7f| \u00A7b+ " + JobProgressionService.formatNumber(xp) + " XP \u00A77(Unemployed)"), true);
                             JobManager.get().syncJobsToClient(player);
                         }
                     }

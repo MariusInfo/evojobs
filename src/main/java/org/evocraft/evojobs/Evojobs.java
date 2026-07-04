@@ -41,6 +41,7 @@ public class Evojobs {
         event.enqueueWork(() -> {
             LOGGER.info("[EvoJobs] Initializam sistemul suprem de Joburi...");
             JobConfigManager.initialize();
+            JobProgressionConfigManager.initialize();
             JobStationManager.initialize();
             AntiExploitManager.initialize();
             JobManager.initialize();
@@ -58,6 +59,7 @@ public class Evojobs {
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("[EvoJobs] Serverul porneste. Incarcam config-urile si bazele de date...");
         JobConfigManager.get().load();
+        JobProgressionConfigManager.get().load();
         JobStationManager.get().load();
         AntiExploitManager.get().load();
 

@@ -1,9 +1,9 @@
 package org.evocraft.evojobs;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.evocraft.evojobs.client.ClientJobsData;
@@ -15,34 +15,83 @@ import java.util.function.Supplier;
 
 public class S2C_SyncJobsPacket {
     public static class JobSyncData {
-        public String name; public int level; public double currentXp; public double requiredXp; public String iconId; public boolean isActive;
-        public JobSyncData(String n, int l, double x, double r, String i, boolean a) { name=n; level=l; currentXp=x; requiredXp=r; iconId=i; isActive=a; }
+        public String name;
+        public long level;
+        public double currentXp;
+        public double requiredXp;
+        public String iconId;
+        public boolean isActive;
+        public double xpMultiplier;
+        public double moneyMultiplier;
+        public String attributeName;
+        public double attributePower;
+        public double attributeEffectPercent;
+
+        public JobSyncData(String name, long level, double currentXp, double requiredXp, String iconId, boolean isActive,
+                           double xpMultiplier, double moneyMultiplier, String attributeName, double attributePower,
+                           double attributeEffectPercent) {
+            this.name = name;
+            this.level = level;
+            this.currentXp = currentXp;
+            this.requiredXp = requiredXp;
+            this.iconId = iconId;
+            this.isActive = isActive;
+            this.xpMultiplier = xpMultiplier;
+            this.moneyMultiplier = moneyMultiplier;
+            this.attributeName = attributeName;
+            this.attributePower = attributePower;
+            this.attributeEffectPercent = attributeEffectPercent;
+        }
     }
 
     private final List<JobSyncData> jobs;
+    private final long totalJobLevel;
+    private final long synergyLevel;
 
-    public S2C_SyncJobsPacket(List<JobSyncData> jobs) { this.jobs = jobs; }
+    public S2C_SyncJobsPacket(List<JobSyncData> jobs, long totalJobLevel, long synergyLevel) {
+        this.jobs = jobs;
+        this.totalJobLevel = totalJobLevel;
+        this.synergyLevel = synergyLevel;
+    }
 
     public S2C_SyncJobsPacket(FriendlyByteBuf buf) {
+        totalJobLevel = buf.readLong();
+        synergyLevel = buf.readLong();
         jobs = new ArrayList<>();
         int size = buf.readInt();
         for (int i = 0; i < size; i++) {
             jobs.add(new JobSyncData(
-                    buf.readUtf(), buf.readInt(), buf.readDouble(), buf.readDouble(), buf.readUtf(), buf.readBoolean()
+                    buf.readUtf(),
+                    buf.readLong(),
+                    buf.readDouble(),
+                    buf.readDouble(),
+                    buf.readUtf(),
+                    buf.readBoolean(),
+                    buf.readDouble(),
+                    buf.readDouble(),
+                    buf.readUtf(),
+                    buf.readDouble(),
+                    buf.readDouble()
             ));
         }
     }
 
     public void toBytes(FriendlyByteBuf buf) {
+        buf.writeLong(totalJobLevel);
+        buf.writeLong(synergyLevel);
         buf.writeInt(jobs.size());
         for (JobSyncData job : jobs) {
-            // AICI ERA BUBIȚA! Dacă venea ceva null, dădea "Invalid Player Data"
             buf.writeUtf(job.name != null ? job.name : "Unknown");
-            buf.writeInt(job.level);
+            buf.writeLong(Math.max(1L, job.level));
             buf.writeDouble(job.currentXp);
             buf.writeDouble(job.requiredXp);
             buf.writeUtf(job.iconId != null ? job.iconId : "minecraft:paper");
             buf.writeBoolean(job.isActive);
+            buf.writeDouble(job.xpMultiplier);
+            buf.writeDouble(job.moneyMultiplier);
+            buf.writeUtf(job.attributeName != null ? job.attributeName : "Job Attribute");
+            buf.writeDouble(job.attributePower);
+            buf.writeDouble(job.attributeEffectPercent);
         }
     }
 
@@ -58,9 +107,21 @@ public class S2C_SyncJobsPacket {
                     var item = ForgeRegistries.ITEMS.getValue(loc);
                     if (item != null) icon = new ItemStack(item);
                 }
-                clientJobs.add(new JobInfo(data.name, data.level, data.currentXp, data.requiredXp, icon, data.isActive));
+                clientJobs.add(new JobInfo(
+                        data.name,
+                        data.level,
+                        data.currentXp,
+                        data.requiredXp,
+                        icon,
+                        data.isActive,
+                        data.xpMultiplier,
+                        data.moneyMultiplier,
+                        data.attributeName,
+                        data.attributePower,
+                        data.attributeEffectPercent
+                ));
             }
-            ClientJobsData.updateJobs(clientJobs);
+            ClientJobsData.updateJobs(clientJobs, totalJobLevel, synergyLevel);
         });
         context.setPacketHandled(true);
         return true;

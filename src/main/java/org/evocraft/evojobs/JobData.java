@@ -1,7 +1,7 @@
 package org.evocraft.evojobs;
 
 public class JobData {
-    public int level;
+    public long level;
     public double xp;
     public boolean isActive; // True = Currently working, False = Resigned (Paused)
 
@@ -11,13 +11,13 @@ public class JobData {
         this.isActive = true;
     }
 
-    public JobData(int level, double xp, boolean isActive) {
-        this.level = level;
-        this.xp = xp;
+    public JobData(long level, double xp, boolean isActive) {
+        this.level = Math.max(1L, level);
+        this.xp = Double.isFinite(xp) && xp > 0.0 ? xp : 0.0;
         this.isActive = isActive;
     }
 
     public double getRequiredXp() {
-        return 100 * Math.pow(level, 1.5);
+        return JobProgressionService.getRequiredXpForNextLevel(level);
     }
 }
