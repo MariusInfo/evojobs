@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:somer/level_40",
-  "display": {
-    "icon": {
-      "item": "minecraft:painting"
-    },
-    "title": "Expert în Lene",
-    "description": "Job somer - Nivel 50",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:somer/level_40",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:painting"
+                             },
+                    "title":  "Laziness Expert",
+                    "description":  "Unemployed Job - Level 50",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

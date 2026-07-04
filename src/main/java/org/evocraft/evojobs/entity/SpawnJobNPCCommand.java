@@ -22,10 +22,10 @@ public class SpawnJobNPCCommand {
                         npc.moveTo(pos.x, pos.y, pos.z, player.getYRot(), player.getXRot());
                         player.serverLevel().addFreshEntity(npc);
 
-                        player.sendSystemMessage(Component.literal("§a✔ Ai spawnat NPC-ul de Joburi cu succes!"));
+                        player.sendSystemMessage(Component.literal("§a[EvoJobs] Job NPC spawned successfully!"));
                         return 1;
                     } else {
-                        player.sendSystemMessage(Component.literal("§c✖ Eroare: Nu s-a putut crea entitatea!"));
+                        player.sendSystemMessage(Component.literal("§c[EvoJobs] Error: Could not create the entity!"));
                         return 0;
                     }
                 })

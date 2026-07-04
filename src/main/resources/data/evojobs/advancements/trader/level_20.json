@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:trader/level_10",
-  "display": {
-    "icon": {
-      "item": "minecraft:emerald"
-    },
-    "title": "Vânzător Ambulant",
-    "description": "Job trader - Nivel 20",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:trader/level_10",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:emerald"
+                             },
+                    "title":  "Traveling Seller",
+                    "description":  "Trader Job - Level 20",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

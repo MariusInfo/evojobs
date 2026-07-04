@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:hunter/start",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_sword"
-    },
-    "title": "Ucenic Vânător",
-    "description": "Job hunter - Nivel 5",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:hunter/start",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_sword"
+                             },
+                    "title":  "Hunter Apprentice",
+                    "description":  "Hunter Job - Level 5",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

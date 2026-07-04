@@ -14,7 +14,7 @@ public class QuestNPCRenderer extends LivingEntityRenderer<QuestNPC, PlayerModel
 
     @Override
     public ResourceLocation getTextureLocation(QuestNPC entity) {
-        // Va citi skin-ul tău custom din resursele modului!
+        // Reads the custom skin from the mod resources.
         return new ResourceLocation("evojobs", "textures/entity/quest_npc.png");
     }
 }

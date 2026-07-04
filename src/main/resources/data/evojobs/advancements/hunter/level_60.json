@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:hunter/level_50",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_sword"
-    },
-    "title": "Vânător de Wither",
-    "description": "Job hunter - Nivel 60",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:hunter/level_50",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_sword"
+                             },
+                    "title":  "Wither Hunter",
+                    "description":  "Hunter Job - Level 60",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:digger/level_75",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_shovel"
-    },
-    "title": "Sculptor de Teren",
-    "description": "Job digger - Nivel 80",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:digger/level_75",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_shovel"
+                             },
+                    "title":  "Terrain Sculptor",
+                    "description":  "Digger Job - Level 80",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

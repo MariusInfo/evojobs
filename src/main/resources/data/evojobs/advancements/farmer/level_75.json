@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:farmer/level_70",
-  "display": {
-    "icon": {
-      "item": "minecraft:wheat"
-    },
-    "title": "Maestrul Fertilizării",
-    "description": "Job farmer - Nivel 75",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:farmer/level_70",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:wheat"
+                             },
+                    "title":  "Fertilizer Master",
+                    "description":  "Farmer Job - Level 75",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

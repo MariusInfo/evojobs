@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:crafter/level_5",
-  "display": {
-    "icon": {
-      "item": "minecraft:crafting_table"
-    },
-    "title": "Ucenic la Banc",
-    "description": "Job crafter - Nivel 10",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:crafter/level_5",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:crafting_table"
+                             },
+                    "title":  "Workbench Apprentice",
+                    "description":  "Crafter Job - Level 10",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

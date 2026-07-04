@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:farmer/level_80",
-  "display": {
-    "icon": {
-      "item": "minecraft:wheat"
-    },
-    "title": "Regele Grânelor",
-    "description": "Job farmer - Nivel 90",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:farmer/level_80",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:wheat"
+                             },
+                    "title":  "King of Grain",
+                    "description":  "Farmer Job - Level 90",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

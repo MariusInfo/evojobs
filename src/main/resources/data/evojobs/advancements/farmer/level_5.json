@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:farmer/start",
-  "display": {
-    "icon": {
-      "item": "minecraft:wheat"
-    },
-    "title": "Săpător în Noroi",
-    "description": "Job farmer - Nivel 5",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:farmer/start",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:wheat"
+                             },
+                    "title":  "Mud Digger",
+                    "description":  "Farmer Job - Level 5",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

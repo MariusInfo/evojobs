@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:miner/level_60",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_pickaxe"
-    },
-    "title": "Fărâmițător de Obsidian",
-    "description": "Job miner - Nivel 70",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:miner/level_60",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_pickaxe"
+                             },
+                    "title":  "Obsidian Crusher",
+                    "description":  "Miner Job - Level 70",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

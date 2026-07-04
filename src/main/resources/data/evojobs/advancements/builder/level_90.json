@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:builder/level_80",
-  "display": {
-    "icon": {
-      "item": "minecraft:bricks"
-    },
-    "title": "Proiectant Suprem",
-    "description": "Job builder - Nivel 90",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:builder/level_80",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:bricks"
+                             },
+                    "title":  "Supreme Designer",
+                    "description":  "Builder Job - Level 90",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

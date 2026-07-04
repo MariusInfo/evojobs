@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:somer/level_80",
-  "display": {
-    "icon": {
-      "item": "minecraft:painting"
-    },
-    "title": "Fantoma Serverului",
-    "description": "Job somer - Nivel 90",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:somer/level_80",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:painting"
+                             },
+                    "title":  "Server Ghost",
+                    "description":  "Unemployed Job - Level 90",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

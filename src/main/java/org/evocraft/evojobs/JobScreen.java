@@ -56,8 +56,8 @@ public class JobScreen extends AbstractContainerScreen<JobMenu> {
         super.init();
         buttons.clear();
 
-        btnPrev = new CustomButton("◀ Previous Page", 0, 0, 120, 20, () -> { if (currentPage > 0) currentPage--; });
-        btnNext = new CustomButton("Next Page ▶", 0, 0, 120, 20, () -> {
+        btnPrev = new CustomButton("< Previous Page", 0, 0, 120, 20, () -> { if (currentPage > 0) currentPage--; });
+        btnNext = new CustomButton("Next Page >", 0, 0, 120, 20, () -> {
             int maxPages = (this.menu.availableJobs.size() - 1) / 12;
             if (currentPage < maxPages) currentPage++;
         });

@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:woodcutter/level_75",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_axe"
-    },
-    "title": "Legenda Codrului",
-    "description": "Job woodcutter - Nivel 80",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:woodcutter/level_75",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_axe"
+                             },
+                    "title":  "Woodland Legend",
+                    "description":  "Lumberjack Job - Level 80",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

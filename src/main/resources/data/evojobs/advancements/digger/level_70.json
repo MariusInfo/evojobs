@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:digger/level_60",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_shovel"
-    },
-    "title": "Maestrul Lopatei",
-    "description": "Job digger - Nivel 70",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:digger/level_60",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_shovel"
+                             },
+                    "title":  "Shovel Master",
+                    "description":  "Digger Job - Level 70",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

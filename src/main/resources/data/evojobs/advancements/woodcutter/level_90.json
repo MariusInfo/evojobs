@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:woodcutter/level_80",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_axe"
-    },
-    "title": "Spaima Ent-ilor",
-    "description": "Job woodcutter - Nivel 90",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:woodcutter/level_80",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_axe"
+                             },
+                    "title":  "Ent Terror",
+                    "description":  "Lumberjack Job - Level 90",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

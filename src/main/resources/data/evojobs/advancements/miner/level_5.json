@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:miner/start",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_pickaxe"
-    },
-    "title": "Căutător de Piatră",
-    "description": "Job miner - Nivel 5",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:miner/start",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_pickaxe"
+                             },
+                    "title":  "Stone Seeker",
+                    "description":  "Miner Job - Level 5",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:digger/level_30",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_shovel"
-    },
-    "title": "Săpător Profesionist",
-    "description": "Job digger - Nivel 40",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:digger/level_30",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_shovel"
+                             },
+                    "title":  "Professional Digger",
+                    "description":  "Digger Job - Level 40",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

@@ -205,7 +205,7 @@ public class QuestManager {
         POOL.add(new QuestTemplate("crafter", "CRAFT", "minecraft:glass_pane", "Glass Panes", 128, 1200, 90));
 
         // ===============================================
-        // 💎 BLACKSMITH (Fierar) (3 Quests)
+        // BLACKSMITH (3 quests)
         // ===============================================
         POOL.add(new QuestTemplate("fierar", "USE_ANVIL", "*", "Use Anvil (Repair/Rename)", 10, 4000, 350));
         POOL.add(new QuestTemplate("fierar", "USE_ANVIL", "*", "Craft/Repair Gear", 15, 6000, 500));

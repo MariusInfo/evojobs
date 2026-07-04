@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:somer/level_30",
-  "display": {
-    "icon": {
-      "item": "minecraft:painting"
-    },
-    "title": "Regele Paturilor",
-    "description": "Job somer - Nivel 40",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:somer/level_30",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:painting"
+                             },
+                    "title":  "King of Beds",
+                    "description":  "Unemployed Job - Level 40",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

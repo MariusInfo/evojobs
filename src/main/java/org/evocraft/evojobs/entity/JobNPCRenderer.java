@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.evocraft.evojobs.Evojobs;
 
 public class JobNPCRenderer extends MobRenderer<JobNPCEntity, PlayerModel<JobNPCEntity>> {
-    // Aici citește textura. Trebuie să pui o textură la: src/main/resources/assets/evojobs/textures/entity/job_npc.png
+    // Reads the custom texture from src/main/resources/assets/evojobs/textures/entity/job_npc.png.
     private static final ResourceLocation TEXTURE = new ResourceLocation(Evojobs.MODID, "textures/entity/job_npc.png");
 
     public JobNPCRenderer(EntityRendererProvider.Context context) {

@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:root",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_shovel"
-    },
-    "title": "§eCarieră: Digger",
-    "description": "Începe-ți aventura ca digger!",
-    "frame": "task",
-    "show_toast": false,
-    "announce_to_chat": false,
-    "hidden": false
-  },
-  "criteria": {
-    "auto": {
-      "trigger": "minecraft:tick"
-    }
-  }
+    "parent":  "evojobs:root",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_shovel"
+                             },
+                    "title":  "§eCareer: Digger",
+                    "description":  "Start your adventure as Digger!",
+                    "frame":  "task",
+                    "show_toast":  false,
+                    "announce_to_chat":  false,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "auto":  {
+                                  "trigger":  "minecraft:tick"
+                              }
+                 }
 }

@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:root",
-  "display": {
-    "icon": {
-      "item": "minecraft:anvil"
-    },
-    "title": "§eCarieră: Fierar",
-    "description": "Începe-ți aventura ca fierar!",
-    "frame": "task",
-    "show_toast": false,
-    "announce_to_chat": false,
-    "hidden": false
-  },
-  "criteria": {
-    "auto": {
-      "trigger": "minecraft:tick"
-    }
-  }
+    "parent":  "evojobs:root",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:anvil"
+                             },
+                    "title":  "§eCareer: Blacksmith",
+                    "description":  "Start your adventure as Blacksmith!",
+                    "frame":  "task",
+                    "show_toast":  false,
+                    "announce_to_chat":  false,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "auto":  {
+                                  "trigger":  "minecraft:tick"
+                              }
+                 }
 }

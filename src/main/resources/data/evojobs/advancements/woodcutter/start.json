@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:root",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_axe"
-    },
-    "title": "§eCarieră: Woodcutter",
-    "description": "Începe-ți aventura ca woodcutter!",
-    "frame": "task",
-    "show_toast": false,
-    "announce_to_chat": false,
-    "hidden": false
-  },
-  "criteria": {
-    "auto": {
-      "trigger": "minecraft:tick"
-    }
-  }
+    "parent":  "evojobs:root",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_axe"
+                             },
+                    "title":  "§eCareer: Lumberjack",
+                    "description":  "Start your adventure as Lumberjack!",
+                    "frame":  "task",
+                    "show_toast":  false,
+                    "announce_to_chat":  false,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "auto":  {
+                                  "trigger":  "minecraft:tick"
+                              }
+                 }
 }

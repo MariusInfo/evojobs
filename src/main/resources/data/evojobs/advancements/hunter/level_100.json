@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:hunter/level_90",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_sword"
-    },
-    "title": "Zeul Războiului",
-    "description": "Job hunter - Nivel 100",
-    "frame": "challenge",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:hunter/level_90",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_sword"
+                             },
+                    "title":  "God of War",
+                    "description":  "Hunter Job - Level 100",
+                    "frame":  "challenge",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

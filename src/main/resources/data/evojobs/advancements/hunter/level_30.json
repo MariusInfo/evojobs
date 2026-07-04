@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:hunter/level_25",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_sword"
-    },
-    "title": "Vânător de Monștri",
-    "description": "Job hunter - Nivel 30",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:hunter/level_25",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_sword"
+                             },
+                    "title":  "Monster Hunter",
+                    "description":  "Hunter Job - Level 30",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

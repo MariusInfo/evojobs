@@ -57,7 +57,7 @@ public class S2C_OpenQuestMenu {
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            // Verificăm STRICT dacă rulăm pe Client, pentru a evita orice crash pe server!
+            // Strict client-side guard to avoid server crashes.
             if (ctx.get().getDirection().getReceptionSide().isClient()) {
                 org.evocraft.evojobs.client.ClientQuestHandler.openScreen(this);
             }

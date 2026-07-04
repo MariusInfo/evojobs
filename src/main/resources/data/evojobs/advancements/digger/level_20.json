@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:digger/level_10",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_shovel"
-    },
-    "title": "Săpător de Șanțuri",
-    "description": "Job digger - Nivel 20",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:digger/level_10",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_shovel"
+                             },
+                    "title":  "Trench Digger",
+                    "description":  "Digger Job - Level 20",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

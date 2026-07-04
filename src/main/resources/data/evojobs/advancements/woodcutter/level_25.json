@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:woodcutter/level_20",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_axe"
-    },
-    "title": "Lumberjack",
-    "description": "Job woodcutter - Nivel 25",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:woodcutter/level_20",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_axe"
+                             },
+                    "title":  "Lumberjack",
+                    "description":  "Lumberjack Job - Level 25",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

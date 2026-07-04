@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:fierar/level_70",
-  "display": {
-    "icon": {
-      "item": "minecraft:anvil"
-    },
-    "title": "Expert în Aliaje",
-    "description": "Job fierar - Nivel 75",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:fierar/level_70",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:anvil"
+                             },
+                    "title":  "Alloy Expert",
+                    "description":  "Blacksmith Job - Level 75",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

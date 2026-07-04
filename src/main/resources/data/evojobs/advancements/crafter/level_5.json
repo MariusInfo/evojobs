@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:crafter/start",
-  "display": {
-    "icon": {
-      "item": "minecraft:crafting_table"
-    },
-    "title": "Lipește-Lemne",
-    "description": "Job crafter - Nivel 5",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:crafter/start",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:crafting_table"
+                             },
+                    "title":  "Wood Binder",
+                    "description":  "Crafter Job - Level 5",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

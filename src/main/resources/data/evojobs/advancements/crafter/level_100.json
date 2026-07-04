@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:crafter/level_90",
-  "display": {
-    "icon": {
-      "item": "minecraft:crafting_table"
-    },
-    "title": "Creatorul Suprem",
-    "description": "Job crafter - Nivel 100",
-    "frame": "challenge",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:crafter/level_90",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:crafting_table"
+                             },
+                    "title":  "Supreme Creator",
+                    "description":  "Crafter Job - Level 100",
+                    "frame":  "challenge",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

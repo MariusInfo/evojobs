@@ -20,10 +20,10 @@ public class EvoJobsPacketHandler {
     public static void register() {
         int id = 0;
 
-        // 1. Înregistrăm pachetul care trimite joburile către client (Hub)
+        // 1. Register the packet that sends jobs to the client and Hub.
         INSTANCE.registerMessage(id++, S2C_SyncJobsPacket.class, S2C_SyncJobsPacket::toBytes, S2C_SyncJobsPacket::new, S2C_SyncJobsPacket::handle);
 
-        // 2. AICI ESTE REPARAȚIA: Înregistrăm pachetul pentru Meniul de Misiuni (care lipsea)!
+        // 2. Register the packet for the quest menu.
         INSTANCE.registerMessage(id++, S2C_OpenQuestMenu.class, S2C_OpenQuestMenu::toBytes, S2C_OpenQuestMenu::new, S2C_OpenQuestMenu::handle);
     }
 

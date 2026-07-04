@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:somer/level_75",
-  "display": {
-    "icon": {
-      "item": "minecraft:painting"
-    },
-    "title": "Statuie Vie",
-    "description": "Job somer - Nivel 80",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:somer/level_75",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:painting"
+                             },
+                    "title":  "Living Statue",
+                    "description":  "Unemployed Job - Level 80",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

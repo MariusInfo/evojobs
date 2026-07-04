@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:crafter/level_40",
-  "display": {
-    "icon": {
-      "item": "minecraft:crafting_table"
-    },
-    "title": "Maestrul Rețetelor",
-    "description": "Job crafter - Nivel 50",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:crafter/level_40",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:crafting_table"
+                             },
+                    "title":  "Recipe Master",
+                    "description":  "Crafter Job - Level 50",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

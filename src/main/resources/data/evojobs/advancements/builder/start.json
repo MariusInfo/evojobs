@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:root",
-  "display": {
-    "icon": {
-      "item": "minecraft:bricks"
-    },
-    "title": "§eCarieră: Builder",
-    "description": "Începe-ți aventura ca builder!",
-    "frame": "task",
-    "show_toast": false,
-    "announce_to_chat": false,
-    "hidden": false
-  },
-  "criteria": {
-    "auto": {
-      "trigger": "minecraft:tick"
-    }
-  }
+    "parent":  "evojobs:root",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:bricks"
+                             },
+                    "title":  "§eCareer: Builder",
+                    "description":  "Start your adventure as Builder!",
+                    "frame":  "task",
+                    "show_toast":  false,
+                    "announce_to_chat":  false,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "auto":  {
+                                  "trigger":  "minecraft:tick"
+                              }
+                 }
 }

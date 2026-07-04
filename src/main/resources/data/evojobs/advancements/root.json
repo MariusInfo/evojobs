@@ -1,18 +1,18 @@
 {
-  "display": {
-    "icon": {
-      "item": "minecraft:experience_bottle"
-    },
-    "title": "§6§lEvoJobs",
-    "description": "Toate joburile!",
-    "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
-    "show_toast": false,
-    "announce_to_chat": false,
-    "hidden": false
-  },
-  "criteria": {
-    "auto": {
-      "trigger": "minecraft:tick"
-    }
-  }
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:experience_bottle"
+                             },
+                    "title":  "§6§lEvoJobs",
+                    "description":  "All jobs in one place!",
+                    "background":  "minecraft:textures/gui/advancements/backgrounds/stone.png",
+                    "show_toast":  false,
+                    "announce_to_chat":  false,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "auto":  {
+                                  "trigger":  "minecraft:tick"
+                              }
+                 }
 }

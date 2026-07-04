@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:farmer/level_20",
-  "display": {
-    "icon": {
-      "item": "minecraft:wheat"
-    },
-    "title": "Culegător Harnic",
-    "description": "Job farmer - Nivel 25",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:farmer/level_20",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:wheat"
+                             },
+                    "title":  "Hardworking Harvester",
+                    "description":  "Farmer Job - Level 25",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

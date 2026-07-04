@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:farmer/level_75",
-  "display": {
-    "icon": {
-      "item": "minecraft:wheat"
-    },
-    "title": "Membru C.A.P.",
-    "description": "Job farmer - Nivel 80",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:farmer/level_75",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:wheat"
+                             },
+                    "title":  "Cooperative Member",
+                    "description":  "Farmer Job - Level 80",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

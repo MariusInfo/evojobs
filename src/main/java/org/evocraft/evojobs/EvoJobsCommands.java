@@ -19,7 +19,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
 import org.evocraft.evojobs.entity.SpawnJobNPCCommand;
-// --- IMPORTUL LIPSĂ ADĂUGAT ---
 import org.evocraft.evojobs.entity.SpawnQuestNPCCommand;
 
 import java.util.Map;
@@ -29,14 +28,14 @@ public class EvoJobsCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
         dispatcher.register(Commands.literal("jobadmin")
-                .requires(source -> source.hasPermission(2)) // Doar OP / Admini
+                .requires(source -> source.hasPermission(2)) // OP / Admin only.
                 .then(Commands.literal("setstation")
                         .executes(EvoJobsCommands::setStation)
                 )
                 .then(Commands.literal("setlevel")
-                        .then(Commands.argument("jucator", EntityArgument.player())
+                        .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("job", StringArgumentType.word())
-                                        .then(Commands.argument("nivel", LongArgumentType.longArg(1L))
+                                        .then(Commands.argument("level", LongArgumentType.longArg(1L))
                                                 .executes(EvoJobsCommands::setLevel)
                                         )
                                 )
@@ -44,7 +43,6 @@ public class EvoJobsCommands {
                 )
         );
 
-        // --- AICI ÎNREGISTRĂM AMBELE COMENZI PENTRU NPC-URI ---
         SpawnJobNPCCommand.register(dispatcher);
         SpawnQuestNPCCommand.register(dispatcher);
 
@@ -54,20 +52,20 @@ public class EvoJobsCommands {
 
     private static int setLevel(CommandContext<CommandSourceStack> context) {
         try {
-            ServerPlayer target = EntityArgument.getPlayer(context, "jucator");
+            ServerPlayer target = EntityArgument.getPlayer(context, "player");
             String job = StringArgumentType.getString(context, "job").toLowerCase();
-            long level = LongArgumentType.getLong(context, "nivel");
+            long level = LongArgumentType.getLong(context, "level");
 
             if (JobConfigManager.get().getJob(job) == null) {
-                context.getSource().sendFailure(Component.literal("Jobul '" + job + "' nu există!"));
+                context.getSource().sendFailure(Component.literal("Job '" + job + "' does not exist!"));
                 return 0;
             }
 
             JobManager.get().setJobLevel(target.getUUID(), job, level);
-            context.getSource().sendSuccess(() -> Component.literal("§a[EvoJobs] Ai setat jobul §e" + job + " §ala nivelul §b" + level + " §apentru jucătorul §d" + target.getName().getString()), true);
+            context.getSource().sendSuccess(() -> Component.literal("§a[EvoJobs] Set job §e" + job + " §ato level §b" + level + " §afor player §d" + target.getName().getString()), true);
 
         } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Eroare la executarea comenzii setlevel."));
+            context.getSource().sendFailure(Component.literal("Error while executing the setlevel command."));
         }
         return 1;
     }
@@ -79,18 +77,18 @@ public class EvoJobsCommands {
 
             if (jobs != null && jobs.containsKey("crafter") && jobs.get("crafter").isActive && jobs.get("crafter").level >= 25) {
 
-                // AICI E REPARATIA: Suprascriem stillValid ca să permitem Shift-Click și folosirea Mesei din mers!
+                // Keep the virtual crafting table valid even without a physical block.
                 player.openMenu(new SimpleMenuProvider(
                         (id, inv, p) -> new CraftingMenu(id, inv, ContainerLevelAccess.create(p.level(), p.blockPosition())) {
                             @Override
                             public boolean stillValid(Player playerIn) {
-                                return true; // Spunem jocului că masa este mereu validă, chiar dacă nu e un bloc fizic
+                                return true;
                             }
                         },
                         Component.translatable("container.crafting")
                 ));
             } else {
-                player.sendSystemMessage(Component.literal("§c[!] Trebuie să fii Meșter (Level 25+) cu jobul activ pentru a folosi această comandă!"));
+                player.sendSystemMessage(Component.literal("§c[!] You must be a Crafter (Level 25+) with the job active to use this command!"));
             }
         } catch (Exception ignored) {}
         return 1;
@@ -107,7 +105,7 @@ public class EvoJobsCommands {
                         Component.translatable("container.enderchest")
                 ));
             } else {
-                player.sendSystemMessage(Component.literal("§c[!] Trebuie să fii Meșter (Level 50+) cu jobul activ pentru a folosi această comandă!"));
+                player.sendSystemMessage(Component.literal("§c[!] You must be a Crafter (Level 50+) with the job active to use this command!"));
             }
         } catch (Exception ignored) {}
         return 1;
@@ -121,13 +119,13 @@ public class EvoJobsCommands {
             if (hitResult.getType() == HitResult.Type.BLOCK) {
                 BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
                 JobStationManager.get().addStation(player.level(), pos);
-                player.sendSystemMessage(Component.literal("§a[EvoJobs] Stație de Job salvată cu succes la: " + pos.toShortString()));
+                player.sendSystemMessage(Component.literal("§a[EvoJobs] Job station saved successfully at: " + pos.toShortString()));
             } else {
-                player.sendSystemMessage(Component.literal("§c[EvoJobs] Trebuie să te uiți la un bloc pentru a-l face stație de job!"));
+                player.sendSystemMessage(Component.literal("§c[EvoJobs] You must look at a block to set it as a job station!"));
             }
 
         } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Eroare la executarea comenzii."));
+            context.getSource().sendFailure(Component.literal("Error while executing the command."));
         }
         return 1;
     }

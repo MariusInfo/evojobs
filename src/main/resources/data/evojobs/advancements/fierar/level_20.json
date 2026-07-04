@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:fierar/level_10",
-  "display": {
-    "icon": {
-      "item": "minecraft:anvil"
-    },
-    "title": "Reparator",
-    "description": "Job fierar - Nivel 20",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:fierar/level_10",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:anvil"
+                             },
+                    "title":  "Repairman",
+                    "description":  "Blacksmith Job - Level 20",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

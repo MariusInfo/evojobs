@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:crafter/level_50",
-  "display": {
-    "icon": {
-      "item": "minecraft:crafting_table"
-    },
-    "title": "Creator de Armuri",
-    "description": "Job crafter - Nivel 60",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:crafter/level_50",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:crafting_table"
+                             },
+                    "title":  "Armor Creator",
+                    "description":  "Crafter Job - Level 60",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

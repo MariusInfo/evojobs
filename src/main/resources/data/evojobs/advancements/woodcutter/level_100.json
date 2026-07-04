@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:woodcutter/level_90",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_axe"
-    },
-    "title": "Regele Naturii",
-    "description": "Job woodcutter - Nivel 100",
-    "frame": "challenge",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:woodcutter/level_90",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_axe"
+                             },
+                    "title":  "King of Nature",
+                    "description":  "Lumberjack Job - Level 100",
+                    "frame":  "challenge",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

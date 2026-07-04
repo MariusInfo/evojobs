@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:hunter/level_60",
-  "display": {
-    "icon": {
-      "item": "minecraft:iron_sword"
-    },
-    "title": "Maestrul Săbiilor",
-    "description": "Job hunter - Nivel 70",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:hunter/level_60",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:iron_sword"
+                             },
+                    "title":  "Sword Master",
+                    "description":  "Hunter Job - Level 70",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

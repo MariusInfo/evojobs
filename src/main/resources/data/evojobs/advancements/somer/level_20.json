@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:somer/level_10",
-  "display": {
-    "icon": {
-      "item": "minecraft:painting"
-    },
-    "title": "Adormit",
-    "description": "Job somer - Nivel 20",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:somer/level_10",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:painting"
+                             },
+                    "title":  "Sleepyhead",
+                    "description":  "Unemployed Job - Level 20",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

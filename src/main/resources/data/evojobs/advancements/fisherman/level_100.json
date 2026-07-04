@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:fisherman/level_90",
-  "display": {
-    "icon": {
-      "item": "minecraft:fishing_rod"
-    },
-    "title": "Zeul Mărilor",
-    "description": "Job fisherman - Nivel 100",
-    "frame": "challenge",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:fisherman/level_90",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:fishing_rod"
+                             },
+                    "title":  "God of the Seas",
+                    "description":  "Fisherman Job - Level 100",
+                    "frame":  "challenge",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

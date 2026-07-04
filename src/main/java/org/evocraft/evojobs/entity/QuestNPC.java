@@ -12,24 +12,22 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.evocraft.evojobs.quest.QuestManager;
 import org.evocraft.evojobs.network.S2C_OpenQuestMenu;
-import org.evocraft.evojobs.network.EvoJobsPacketHandler; // Importăm corect clasa ta de pachete
+import org.evocraft.evojobs.network.EvoJobsPacketHandler;
 
 public class QuestNPC extends PathfinderMob {
 
     public QuestNPC(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
-        this.setNoAi(true); // Îl ține locului, static
+        this.setNoAi(true);
         this.setNoGravity(true);
         this.setInvulnerable(true);
         this.noPhysics = true;
 
-        // Titlul de deasupra capului
-        this.setCustomName(Component.literal("§e§lMisiuni Zilnice"));
+        this.setCustomName(Component.literal("§e§lDaily Quests"));
         this.setCustomNameVisible(true);
-        this.setPersistenceRequired(); // Nu va dispărea la restart / chunk unload
+        this.setPersistenceRequired();
     }
 
-    // Oprește despawn-ul la distanță
     @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
         return false;
@@ -49,13 +47,10 @@ public class QuestNPC extends PathfinderMob {
 
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
-        // Asigură-te că se execută o singură dată (pe MAIN_HAND)
         if (!this.level().isClientSide() && hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer sp) {
 
-            // Preluăm progresul din baza de date
             int[] progress = QuestManager.getPlayerProgress(sp);
 
-            // FIX: Folosim metoda ta existentă 'sendToPlayer' care funcționează perfect pe 1.20.1!
             EvoJobsPacketHandler.sendToPlayer(new S2C_OpenQuestMenu(progress), sp);
         }
         return InteractionResult.sidedSuccess(this.level().isClientSide);

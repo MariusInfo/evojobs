@@ -12,7 +12,7 @@ public class EvoJobsEntities {
 
     public static final RegistryObject<EntityType<JobNPCEntity>> JOB_NPC = ENTITIES.register("job_npc",
             () -> EntityType.Builder.of(JobNPCEntity::new, MobCategory.MISC)
-                    .sized(0.6F, 1.95F) // Dimensiunea unui jucător normal
+                    .sized(0.6F, 1.95F) // Normal player size.
                     .clientTrackingRange(8)
                     .build("job_npc"));
 

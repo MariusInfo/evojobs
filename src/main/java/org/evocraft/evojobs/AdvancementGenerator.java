@@ -1,27 +1,72 @@
 package org.evocraft.evojobs;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class AdvancementGenerator {
 
     public static void main(String[] args) {
-        String basePath = "src/main/resources/data/evojobs/advancements/";
+        Path basePath = Path.of("src/main/resources/data/evojobs/advancements/");
 
-        // 1. GENERĂM UN SINGUR ROOT PENTRU TOT MODUL (Tab-ul principal)
-        File rootDir = new File(basePath);
-        rootDir.mkdirs();
+        try {
+            Files.createDirectories(basePath);
+            write(basePath.resolve("root.json"), rootJson());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
 
-        String mainRootJson = "{\n" +
+        Map<String, String> jobIcons = getJobIcons();
+        Map<String, String> jobDisplayNames = getJobDisplayNames();
+        Map<String, Map<Integer, String>> allAchievements = getAchievementsMap();
+
+        for (Map.Entry<String, Map<Integer, String>> jobEntry : allAchievements.entrySet()) {
+            String job = jobEntry.getKey();
+            String icon = jobIcons.getOrDefault(job, "minecraft:paper");
+            String displayName = jobDisplayNames.getOrDefault(job, capitalize(job));
+            Path jobDir = basePath.resolve(job);
+
+            try {
+                Files.createDirectories(jobDir);
+                String jobStartId = "evojobs:" + job + "/start";
+                write(jobDir.resolve("start.json"), startJson(icon, displayName));
+
+                int[] levels = {5, 10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 100};
+                String currentParent = jobStartId;
+
+                for (int level : levels) {
+                    String title = jobEntry.getValue().get(level);
+                    if (title == null) continue;
+
+                    String frame = (level == 100) ? "challenge" : (level >= 50 ? "goal" : "task");
+                    write(jobDir.resolve("level_" + level + ".json"), levelJson(currentParent, icon, title, displayName, level, frame));
+                    currentParent = "evojobs:" + job + "/level_" + level;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("Done! Advancement files were generated in English.");
+    }
+
+    private static void write(Path path, String content) throws IOException {
+        Files.writeString(path, content, StandardCharsets.UTF_8);
+    }
+
+    private static String rootJson() {
+        return "{\n" +
                 "  \"display\": {\n" +
                 "    \"icon\": {\n" +
-                "      \"item\": \"minecraft:experience_bottle\"\n" + // Iconița pentru tab-ul principal
+                "      \"item\": \"minecraft:experience_bottle\"\n" +
                 "    },\n" +
-                "    \"title\": \"§6§lEvoJobs\",\n" +
-                "    \"description\": \"Toate joburile într-un singur loc!\",\n" +
+                "    \"title\": \"\\u00a76\\u00a7lEvoJobs\",\n" +
+                "    \"description\": \"All jobs in one place!\",\n" +
                 "    \"background\": \"minecraft:textures/gui/advancements/backgrounds/stone.png\",\n" +
                 "    \"show_toast\": false,\n" +
                 "    \"announce_to_chat\": false,\n" +
@@ -33,11 +78,53 @@ public class AdvancementGenerator {
                 "    }\n" +
                 "  }\n" +
                 "}";
+    }
 
-        try (FileWriter writer = new FileWriter(new File(basePath, "root.json"))) {
-            writer.write(mainRootJson);
-        } catch (IOException e) { e.printStackTrace(); }
+    private static String startJson(String icon, String displayName) {
+        return "{\n" +
+                "  \"parent\": \"evojobs:root\",\n" +
+                "  \"display\": {\n" +
+                "    \"icon\": {\n" +
+                "      \"item\": \"" + icon + "\"\n" +
+                "    },\n" +
+                "    \"title\": \"\\u00a7eCareer: " + displayName + "\",\n" +
+                "    \"description\": \"Start your adventure as " + displayName + "!\",\n" +
+                "    \"frame\": \"task\",\n" +
+                "    \"show_toast\": false,\n" +
+                "    \"announce_to_chat\": false,\n" +
+                "    \"hidden\": false\n" +
+                "  },\n" +
+                "  \"criteria\": {\n" +
+                "    \"auto\": {\n" +
+                "      \"trigger\": \"minecraft:tick\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+    }
 
+    private static String levelJson(String parent, String icon, String title, String displayName, int level, String frame) {
+        return "{\n" +
+                "  \"parent\": \"" + parent + "\",\n" +
+                "  \"display\": {\n" +
+                "    \"icon\": {\n" +
+                "      \"item\": \"" + icon + "\"\n" +
+                "    },\n" +
+                "    \"title\": \"" + title + "\",\n" +
+                "    \"description\": \"" + displayName + " Job - Level " + level + "\",\n" +
+                "    \"frame\": \"" + frame + "\",\n" +
+                "    \"show_toast\": true,\n" +
+                "    \"announce_to_chat\": true,\n" +
+                "    \"hidden\": false\n" +
+                "  },\n" +
+                "  \"criteria\": {\n" +
+                "    \"trigger\": {\n" +
+                "      \"trigger\": \"minecraft:impossible\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+    }
+
+    private static Map<String, String> getJobIcons() {
         Map<String, String> jobIcons = new HashMap<>();
         jobIcons.put("miner", "minecraft:iron_pickaxe");
         jobIcons.put("woodcutter", "minecraft:iron_axe");
@@ -50,118 +137,77 @@ public class AdvancementGenerator {
         jobIcons.put("trader", "minecraft:emerald");
         jobIcons.put("somer", "minecraft:painting");
         jobIcons.put("fierar", "minecraft:anvil");
+        return jobIcons;
+    }
 
-        Map<String, Map<Integer, String>> allAchievements = getAchievementsMap();
-
-        for (Map.Entry<String, Map<Integer, String>> jobEntry : allAchievements.entrySet()) {
-            String job = jobEntry.getKey();
-            String icon = jobIcons.getOrDefault(job, "minecraft:paper");
-
-            File jobDir = new File(basePath + job);
-            jobDir.mkdirs();
-
-            // 2. GENERĂM "INTRAREA" PENTRU FIECARE JOB (Legată de Root-ul principal)
-            String jobStartId = "evojobs:" + job + "/start";
-            String jobStartJson = "{\n" +
-                    "  \"parent\": \"evojobs:root\",\n" + // Se leagă de tab-ul principal
-                    "  \"display\": {\n" +
-                    "    \"icon\": {\n" +
-                    "      \"item\": \"" + icon + "\"\n" +
-                    "    },\n" +
-                    "    \"title\": \"§eCarieră: " + job.substring(0, 1).toUpperCase() + job.substring(1) + "\",\n" +
-                    "    \"description\": \"Începe-ți aventura ca " + job + "!\",\n" +
-                    "    \"frame\": \"task\",\n" +
-                    "    \"show_toast\": false,\n" +
-                    "    \"announce_to_chat\": false,\n" +
-                    "    \"hidden\": false\n" +
-                    "  },\n" +
-                    "  \"criteria\": {\n" +
-                    "    \"auto\": {\n" +
-                    "      \"trigger\": \"minecraft:tick\"\n" +
-                    "    }\n" +
-                    "  }\n" +
-                    "}";
-
-            try (FileWriter writer = new FileWriter(new File(jobDir, "start.json"))) {
-                writer.write(jobStartJson);
-            } catch (IOException e) { e.printStackTrace(); }
-
-            // 3. GENERĂM NIVELELE (Legate de start-ul jobului respectiv)
-            int[] levels = {5, 10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 100};
-            String currentParent = jobStartId;
-
-            for (int level : levels) {
-                if (!jobEntry.getValue().containsKey(level)) continue;
-                String title = jobEntry.getValue().get(level);
-
-                String frame = (level == 100) ? "challenge" : (level >= 50 ? "goal" : "task");
-
-                String json = "{\n" +
-                        "  \"parent\": \"" + currentParent + "\",\n" +
-                        "  \"display\": {\n" +
-                        "    \"icon\": {\n" +
-                        "      \"item\": \"" + icon + "\"\n" +
-                        "    },\n" +
-                        "    \"title\": \"" + title + "\",\n" +
-                        "    \"description\": \"Job " + job + " - Nivel " + level + "\",\n" +
-                        "    \"frame\": \"" + frame + "\",\n" +
-                        "    \"show_toast\": true,\n" +
-                        "    \"announce_to_chat\": true,\n" +
-                        "    \"hidden\": false\n" +
-                        "  },\n" +
-                        "  \"criteria\": {\n" +
-                        "    \"trigger\": {\n" +
-                        "      \"trigger\": \"minecraft:impossible\"\n" +
-                        "    }\n" +
-                        "  }\n" +
-                        "}";
-
-                try (FileWriter writer = new FileWriter(new File(jobDir, "level_" + level + ".json"))) {
-                    writer.write(json);
-                } catch (IOException e) { e.printStackTrace(); }
-
-                currentParent = "evojobs:" + job + "/level_" + level;
-            }
-        }
-        System.out.println("Gata! Structura a fost compactată într-un singur tab.");
+    private static Map<String, String> getJobDisplayNames() {
+        Map<String, String> displayNames = new HashMap<>();
+        displayNames.put("miner", "Miner");
+        displayNames.put("woodcutter", "Lumberjack");
+        displayNames.put("digger", "Digger");
+        displayNames.put("hunter", "Hunter");
+        displayNames.put("farmer", "Farmer");
+        displayNames.put("fisherman", "Fisherman");
+        displayNames.put("builder", "Builder");
+        displayNames.put("crafter", "Crafter");
+        displayNames.put("trader", "Trader");
+        displayNames.put("somer", "Unemployed");
+        displayNames.put("fierar", "Blacksmith");
+        return displayNames;
     }
 
     private static Map<String, Map<Integer, String>> getAchievementsMap() {
-        // ... (Același Map de achievements ca înainte, nu s-a schimbat)
-        Map<String, Map<Integer, String>> map = new HashMap<>();
-        Map<Integer, String> miner = new HashMap<>();
-        miner.put(5, "Căutător de Piatră"); miner.put(10, "Sfredelitor"); miner.put(20, "Spărgător de Rocă"); miner.put(25, "Spărgător de Stânci"); miner.put(30, "Săpător de Tuneluri"); miner.put(40, "Miner Experimentat"); miner.put(50, "Maestrul Minereurilor"); miner.put(60, "Căutător de Comori"); miner.put(70, "Fărâmițător de Obsidian"); miner.put(75, "Inimă de Piatră"); miner.put(80, "Distrugător de Peșteri"); miner.put(90, "Legenda Adâncurilor"); miner.put(100, "Zeul Subteranului");
+        Map<String, Map<Integer, String>> map = new LinkedHashMap<>();
+
+        Map<Integer, String> miner = new LinkedHashMap<>();
+        miner.put(5, "Stone Seeker"); miner.put(10, "Tunnel Driller"); miner.put(20, "Rock Breaker"); miner.put(25, "Stonebreaker"); miner.put(30, "Tunnel Digger"); miner.put(40, "Experienced Miner"); miner.put(50, "Ore Master"); miner.put(60, "Treasure Seeker"); miner.put(70, "Obsidian Crusher"); miner.put(75, "Heart of Stone"); miner.put(80, "Cave Destroyer"); miner.put(90, "Depths Legend"); miner.put(100, "Underground God");
         map.put("miner", miner);
-        Map<Integer, String> wood = new HashMap<>();
-        wood.put(5, "Tăietor de Crengi"); wood.put(10, "Adunător de Lemne"); wood.put(20, "Tăietor de Copaci"); wood.put(25, "Lumberjack"); wood.put(30, "Fărâmițător de Trunchiuri"); wood.put(40, "Defrișator"); wood.put(50, "Druidul Topoarelor"); wood.put(60, "Măcelar de Copaci"); wood.put(70, "Maestrul Pădurilor"); wood.put(75, "Spărgător de Ecosisteme"); wood.put(80, "Legenda Codrului"); wood.put(90, "Spaima Ent-ilor"); wood.put(100, "Regele Naturii");
+
+        Map<Integer, String> wood = new LinkedHashMap<>();
+        wood.put(5, "Branch Cutter"); wood.put(10, "Wood Gatherer"); wood.put(20, "Tree Chopper"); wood.put(25, "Lumberjack"); wood.put(30, "Trunk Crusher"); wood.put(40, "Forester"); wood.put(50, "Axe Druid"); wood.put(60, "Tree Butcher"); wood.put(70, "Forest Master"); wood.put(75, "Ecosystem Breaker"); wood.put(80, "Woodland Legend"); wood.put(90, "Ent Terror"); wood.put(100, "King of Nature");
         map.put("woodcutter", wood);
-        Map<Integer, String> digger = new HashMap<>();
-        digger.put(5, "Zgârie-Pământ"); digger.put(10, "Cârtiță Curioasă"); digger.put(20, "Săpător de Șanțuri"); digger.put(25, "Excavator Uman"); digger.put(30, "Mută-Nisip"); digger.put(40, "Săpător Profesionist"); digger.put(50, "Spărgător de Temelii"); digger.put(60, "Făcător de Cratere"); digger.put(70, "Maestrul Lopatei"); digger.put(75, "Înghițitor de Pământ"); digger.put(80, "Sculptor de Teren"); digger.put(90, "Seismolog"); digger.put(100, "Zeul Pământului");
+
+        Map<Integer, String> digger = new LinkedHashMap<>();
+        digger.put(5, "Dirt Scratcher"); digger.put(10, "Curious Mole"); digger.put(20, "Trench Digger"); digger.put(25, "Human Excavator"); digger.put(30, "Sand Mover"); digger.put(40, "Professional Digger"); digger.put(50, "Foundation Breaker"); digger.put(60, "Crater Maker"); digger.put(70, "Shovel Master"); digger.put(75, "Earth Eater"); digger.put(80, "Terrain Sculptor"); digger.put(90, "Seismologist"); digger.put(100, "God of the Earth");
         map.put("digger", digger);
-        Map<Integer, String> hunter = new HashMap<>();
-        hunter.put(5, "Ucenic Vânător"); hunter.put(10, "Vânător de Zombi"); hunter.put(20, "Ucigaș de Scheleți"); hunter.put(25, "Spaima Nopții"); hunter.put(30, "Vânător de Monștri"); hunter.put(40, "Vânător de Elită"); hunter.put(50, "Spaima Nether-ului"); hunter.put(60, "Vânător de Wither"); hunter.put(70, "Maestrul Săbiilor"); hunter.put(75, "Eradicator de Umbre"); hunter.put(80, "Vânător de Dragoni"); hunter.put(90, "Asasin Implacabil"); hunter.put(100, "Zeul Războiului");
+
+        Map<Integer, String> hunter = new LinkedHashMap<>();
+        hunter.put(5, "Hunter Apprentice"); hunter.put(10, "Zombie Hunter"); hunter.put(20, "Skeleton Slayer"); hunter.put(25, "Terror of the Night"); hunter.put(30, "Monster Hunter"); hunter.put(40, "Elite Hunter"); hunter.put(50, "Nether Terror"); hunter.put(60, "Wither Hunter"); hunter.put(70, "Sword Master"); hunter.put(75, "Shadow Eradicator"); hunter.put(80, "Dragon Hunter"); hunter.put(90, "Relentless Assassin"); hunter.put(100, "God of War");
         map.put("hunter", hunter);
-        Map<Integer, String> farmer = new HashMap<>();
-        farmer.put(5, "Săpător în Noroi"); farmer.put(10, "Plantator de Semințe"); farmer.put(20, "Îngrijitor de Animale"); farmer.put(25, "Culegător Harnic"); farmer.put(30, "Fermier Priceput"); farmer.put(40, "Agricultor de Elită"); farmer.put(50, "Domnul Recoltelor"); farmer.put(60, "Îmblânzitor de Bestii"); farmer.put(70, "Maestrul Plantațiilor"); farmer.put(75, "Maestrul Fertilizării"); farmer.put(80, "Membru C.A.P."); farmer.put(90, "Regele Grânelor"); farmer.put(100, "Zeul Agriculturii");
+
+        Map<Integer, String> farmer = new LinkedHashMap<>();
+        farmer.put(5, "Mud Digger"); farmer.put(10, "Seed Planter"); farmer.put(20, "Animal Caretaker"); farmer.put(25, "Hardworking Harvester"); farmer.put(30, "Skilled Farmer"); farmer.put(40, "Elite Agriculturist"); farmer.put(50, "Lord of Harvests"); farmer.put(60, "Beast Tamer"); farmer.put(70, "Plantation Master"); farmer.put(75, "Fertilizer Master"); farmer.put(80, "Cooperative Member"); farmer.put(90, "King of Grain"); farmer.put(100, "God of Agriculture");
         map.put("farmer", farmer);
-        Map<Integer, String> fisher = new HashMap<>();
-        fisher.put(5, "Pescar de Baltă"); fisher.put(10, "Prinzător de Somon"); fisher.put(20, "Pescar de Râu"); fisher.put(25, "Spaima Peștilor"); fisher.put(30, "Pescar de Mare"); fisher.put(40, "Navigator"); fisher.put(50, "Maestrul Undiței"); fisher.put(60, "Vânător de Rechini"); fisher.put(70, "Regele Apelor"); fisher.put(75, "Spaima Oceanelor"); fisher.put(80, "Stăpânul Valurilor"); fisher.put(90, "Căpitan de Vas"); fisher.put(100, "Zeul Mărilor");
+
+        Map<Integer, String> fisher = new LinkedHashMap<>();
+        fisher.put(5, "Pond Fisher"); fisher.put(10, "Salmon Catcher"); fisher.put(20, "River Fisher"); fisher.put(25, "Terror of Fish"); fisher.put(30, "Sea Fisher"); fisher.put(40, "Navigator"); fisher.put(50, "Rod Master"); fisher.put(60, "Shark Hunter"); fisher.put(70, "King of Waters"); fisher.put(75, "Ocean Terror"); fisher.put(80, "Master of Waves"); fisher.put(90, "Ship Captain"); fisher.put(100, "God of the Seas");
         map.put("fisherman", fisher);
-        Map<Integer, String> builder = new HashMap<>();
-        builder.put(5, "Cărămidar Începător"); builder.put(10, "Așează-Blocuri"); builder.put(20, "Zidar Priceput"); builder.put(25, "Constructor de Case"); builder.put(30, "Arhitect Ucenic"); builder.put(40, "Inginer Constructor"); builder.put(50, "Arhitect Șef"); builder.put(60, "Constructor de Castele"); builder.put(70, "Maestru Constructor"); builder.put(75, "Făuritor de Baze"); builder.put(80, "Creator de Orașe"); builder.put(90, "Proiectant Suprem"); builder.put(100, "Făuritor de Lumi");
+
+        Map<Integer, String> builder = new LinkedHashMap<>();
+        builder.put(5, "Beginner Bricklayer"); builder.put(10, "Block Placer"); builder.put(20, "Skilled Mason"); builder.put(25, "House Builder"); builder.put(30, "Architect Apprentice"); builder.put(40, "Construction Engineer"); builder.put(50, "Chief Architect"); builder.put(60, "Castle Builder"); builder.put(70, "Master Builder"); builder.put(75, "Base Forger"); builder.put(80, "City Creator"); builder.put(90, "Supreme Designer"); builder.put(100, "World Forger");
         map.put("builder", builder);
-        Map<Integer, String> crafter = new HashMap<>();
-        crafter.put(5, "Lipește-Lemne"); crafter.put(10, "Ucenic la Banc"); crafter.put(20, "Creator de Unelte"); crafter.put(25, "Artizan Priceput"); crafter.put(30, "Meșter în Fier"); crafter.put(40, "Meșter în Diamante"); crafter.put(50, "Maestrul Rețetelor"); crafter.put(60, "Creator de Armuri"); crafter.put(70, "Mecanic Redstone"); crafter.put(75, "Făuritor de Magie"); crafter.put(80, "Inventator"); crafter.put(90, "Geniu Tehnic"); crafter.put(100, "Creatorul Suprem");
+
+        Map<Integer, String> crafter = new LinkedHashMap<>();
+        crafter.put(5, "Wood Binder"); crafter.put(10, "Workbench Apprentice"); crafter.put(20, "Tool Creator"); crafter.put(25, "Skilled Artisan"); crafter.put(30, "Iron Craftsman"); crafter.put(40, "Diamond Craftsman"); crafter.put(50, "Recipe Master"); crafter.put(60, "Armor Creator"); crafter.put(70, "Redstone Mechanic"); crafter.put(75, "Magic Forger"); crafter.put(80, "Inventor"); crafter.put(90, "Technical Genius"); crafter.put(100, "Supreme Creator");
         map.put("crafter", crafter);
-        Map<Integer, String> trader = new HashMap<>();
-        trader.put(5, "Negociator Slab"); trader.put(10, "Bișnițar Începător"); trader.put(20, "Vânzător Ambulant"); trader.put(25, "Bișnițar Local"); trader.put(30, "Comerciant"); trader.put(40, "Negustor Respectat"); trader.put(50, "Lupul de pe Wall Street"); trader.put(60, "Antreprenor"); trader.put(70, "Maestru în Afaceri"); trader.put(75, "Milionar"); trader.put(80, "Magnat"); trader.put(90, "Regele Economiei"); trader.put(100, "Monopolistul Suprem");
+
+        Map<Integer, String> trader = new LinkedHashMap<>();
+        trader.put(5, "Weak Negotiator"); trader.put(10, "Beginner Hustler"); trader.put(20, "Traveling Seller"); trader.put(25, "Local Hustler"); trader.put(30, "Merchant"); trader.put(40, "Respected Trader"); trader.put(50, "Wall Street Wolf"); trader.put(60, "Entrepreneur"); trader.put(70, "Business Master"); trader.put(75, "Millionaire"); trader.put(80, "Magnate"); trader.put(90, "King of Economy"); trader.put(100, "Supreme Monopolist");
         map.put("trader", trader);
-        Map<Integer, String> somer = new HashMap<>();
-        somer.put(5, "Leneș Începător"); somer.put(10, "Pierde-Vară"); somer.put(20, "Adormit"); somer.put(25, "Campion la Stat Degeaba"); somer.put(30, "Asistat Social"); somer.put(40, "Regele Paturilor"); somer.put(50, "Expert în Lene"); somer.put(60, "Maestrul Somnului"); somer.put(70, "Pensionar Special"); somer.put(75, "Legenda Inactivității"); somer.put(80, "Statuie Vie"); somer.put(90, "Fantoma Serverului"); somer.put(100, "Zeul Inactivității");
+
+        Map<Integer, String> somer = new LinkedHashMap<>();
+        somer.put(5, "Beginner Slacker"); somer.put(10, "Time Waster"); somer.put(20, "Sleepyhead"); somer.put(25, "Champion of Doing Nothing"); somer.put(30, "Welfare Expert"); somer.put(40, "King of Beds"); somer.put(50, "Laziness Expert"); somer.put(60, "Sleep Master"); somer.put(70, "Special Pensioner"); somer.put(75, "Legend of Inactivity"); somer.put(80, "Living Statue"); somer.put(90, "Server Ghost"); somer.put(100, "God of Inactivity");
         map.put("somer", somer);
-        Map<Integer, String> fierar = new HashMap<>();
-        fierar.put(5, "Bate-Fier"); fierar.put(10, "Forjor Începător"); fierar.put(20, "Reparator"); fierar.put(25, "Forjor Priceput"); fierar.put(30, "Topitor de Metale"); fierar.put(40, "Ucenicul Nicovalei"); fierar.put(50, "Maestrul Nicovalei"); fierar.put(60, "Făuritor de Săbii"); fierar.put(70, "Făuritor de Armuri"); fierar.put(75, "Expert în Aliaje"); fierar.put(80, "Vrăjitorul Metalelor"); fierar.put(90, "Legenda Fierăriei"); fierar.put(100, "Zeul Metalului");
+
+        Map<Integer, String> fierar = new LinkedHashMap<>();
+        fierar.put(5, "Iron Hammerer"); fierar.put(10, "Beginner Forger"); fierar.put(20, "Repairman"); fierar.put(25, "Skilled Forger"); fierar.put(30, "Metal Smelter"); fierar.put(40, "Anvil Apprentice"); fierar.put(50, "Anvil Master"); fierar.put(60, "Sword Forger"); fierar.put(70, "Armor Forger"); fierar.put(75, "Alloy Expert"); fierar.put(80, "Metal Wizard"); fierar.put(90, "Forge Legend"); fierar.put(100, "God of Metal");
         map.put("fierar", fierar);
+
         return map;
+    }
+
+    private static String capitalize(String value) {
+        if (value == null || value.isEmpty()) return "";
+        return value.substring(0, 1).toUpperCase() + value.substring(1);
     }
 }

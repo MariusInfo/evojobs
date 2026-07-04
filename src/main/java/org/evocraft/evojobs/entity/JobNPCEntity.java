@@ -19,11 +19,11 @@ public class JobNPCEntity extends PathfinderMob {
 
     public JobNPCEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
-        this.setNoAi(true); // NPC-ul stă pe loc
-        this.setInvulnerable(true); // Nu ia damage
-        this.setCustomName(Component.literal("§e§lCentrul de Angajări"));
+        this.setNoAi(true);
+        this.setInvulnerable(true);
+        this.setCustomName(Component.literal("§e§lJob Center"));
         this.setCustomNameVisible(true);
-        this.setPersistenceRequired(); // Nu dispare
+        this.setPersistenceRequired();
     }
 
     @Override
@@ -34,10 +34,9 @@ public class JobNPCEntity extends PathfinderMob {
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!this.level().isClientSide() && hand == InteractionHand.MAIN_HAND) {
-            // Deschide meniul de joburi pe ecranul jucătorului
             NetworkHooks.openScreen((ServerPlayer) player, new SimpleMenuProvider(
                     (id, inv, p) -> new JobMenu(id, inv),
-                    Component.literal("Joburi")
+                    Component.literal("Jobs")
             ));
             return InteractionResult.SUCCESS;
         }

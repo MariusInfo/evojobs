@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:fisherman/level_75",
-  "display": {
-    "icon": {
-      "item": "minecraft:fishing_rod"
-    },
-    "title": "Stăpânul Valurilor",
-    "description": "Job fisherman - Nivel 80",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:fisherman/level_75",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:fishing_rod"
+                             },
+                    "title":  "Master of Waves",
+                    "description":  "Fisherman Job - Level 80",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

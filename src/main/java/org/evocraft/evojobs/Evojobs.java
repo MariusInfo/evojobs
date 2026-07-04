@@ -39,7 +39,7 @@ public class Evojobs {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            LOGGER.info("[EvoJobs] Initializam sistemul suprem de Joburi...");
+            LOGGER.info("[EvoJobs] Initializing the job system...");
             JobConfigManager.initialize();
             JobProgressionConfigManager.initialize();
             JobStationManager.initialize();
@@ -87,7 +87,7 @@ public class Evojobs {
     public static class ModEvents {
         @SubscribeEvent
         public static void onAttributeCreate(EntityAttributeCreationEvent event) {
-            // AICI ESTE REPARAȚIA: Acum ambele NPC-uri primesc atributele corecte!
+            // Both NPCs receive the correct attributes.
             event.put(EvoJobsEntities.JOB_NPC.get(), JobNPCEntity.createAttributes().build());
             event.put(EvoJobsEntities.QUEST_NPC.get(), QuestNPC.createAttributes().build());
         }

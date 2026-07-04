@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:builder/level_40",
-  "display": {
-    "icon": {
-      "item": "minecraft:bricks"
-    },
-    "title": "Arhitect Șef",
-    "description": "Job builder - Nivel 50",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:builder/level_40",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:bricks"
+                             },
+                    "title":  "Chief Architect",
+                    "description":  "Builder Job - Level 50",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

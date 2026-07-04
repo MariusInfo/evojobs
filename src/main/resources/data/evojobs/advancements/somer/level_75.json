@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:somer/level_70",
-  "display": {
-    "icon": {
-      "item": "minecraft:painting"
-    },
-    "title": "Legenda Inactivității",
-    "description": "Job somer - Nivel 75",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:somer/level_70",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:painting"
+                             },
+                    "title":  "Legend of Inactivity",
+                    "description":  "Unemployed Job - Level 75",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

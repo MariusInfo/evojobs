@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:somer/level_5",
-  "display": {
-    "icon": {
-      "item": "minecraft:painting"
-    },
-    "title": "Pierde-Vară",
-    "description": "Job somer - Nivel 10",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:somer/level_5",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:painting"
+                             },
+                    "title":  "Time Waster",
+                    "description":  "Unemployed Job - Level 10",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

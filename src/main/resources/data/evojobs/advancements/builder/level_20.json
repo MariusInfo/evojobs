@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:builder/level_10",
-  "display": {
-    "icon": {
-      "item": "minecraft:bricks"
-    },
-    "title": "Zidar Priceput",
-    "description": "Job builder - Nivel 20",
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:builder/level_10",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:bricks"
+                             },
+                    "title":  "Skilled Mason",
+                    "description":  "Builder Job - Level 20",
+                    "frame":  "task",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

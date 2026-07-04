@@ -64,7 +64,7 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    // DEPENDENȚA CORECTĂ PENTRU EVOCORE
+    // Correct EvoCore dependency.
     implementation fg.deobf("blank:evocore:1.0")
 }
 

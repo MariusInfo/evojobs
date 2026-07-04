@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:trader/level_60",
-  "display": {
-    "icon": {
-      "item": "minecraft:emerald"
-    },
-    "title": "Maestru în Afaceri",
-    "description": "Job trader - Nivel 70",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:trader/level_60",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:emerald"
+                             },
+                    "title":  "Business Master",
+                    "description":  "Trader Job - Level 70",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

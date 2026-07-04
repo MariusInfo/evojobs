@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:fierar/level_75",
-  "display": {
-    "icon": {
-      "item": "minecraft:anvil"
-    },
-    "title": "Vrăjitorul Metalelor",
-    "description": "Job fierar - Nivel 80",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:fierar/level_75",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:anvil"
+                             },
+                    "title":  "Metal Wizard",
+                    "description":  "Blacksmith Job - Level 80",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

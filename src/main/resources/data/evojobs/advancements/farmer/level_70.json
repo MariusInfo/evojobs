@@ -1,19 +1,19 @@
 {
-  "parent": "evojobs:farmer/level_60",
-  "display": {
-    "icon": {
-      "item": "minecraft:wheat"
-    },
-    "title": "Maestrul Plantațiilor",
-    "description": "Job farmer - Nivel 70",
-    "frame": "goal",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "trigger": {
-      "trigger": "minecraft:impossible"
-    }
-  }
+    "parent":  "evojobs:farmer/level_60",
+    "display":  {
+                    "icon":  {
+                                 "item":  "minecraft:wheat"
+                             },
+                    "title":  "Plantation Master",
+                    "description":  "Farmer Job - Level 70",
+                    "frame":  "goal",
+                    "show_toast":  true,
+                    "announce_to_chat":  true,
+                    "hidden":  false
+                },
+    "criteria":  {
+                     "trigger":  {
+                                     "trigger":  "minecraft:impossible"
+                                 }
+                 }
 }

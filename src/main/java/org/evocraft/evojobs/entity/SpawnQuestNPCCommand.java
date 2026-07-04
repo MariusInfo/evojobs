@@ -21,16 +21,16 @@ public class SpawnQuestNPCCommand {
                         Vec3 pos = player.position();
                         npc.moveTo(pos.x, pos.y, pos.z, player.getYRot(), player.getXRot());
 
-                        // Asigurăm că se uită în aceeași direcție ca tine
+                        // Match the player's facing direction.
                         npc.setYHeadRot(player.getYRot());
                         npc.setYBodyRot(player.getYRot());
 
                         player.serverLevel().addFreshEntity(npc);
 
-                        player.sendSystemMessage(Component.literal("§a✔ Ai spawnat NPC-ul de Misiuni Zilnice cu succes!"));
+                        player.sendSystemMessage(Component.literal("§a[EvoJobs] Daily Quest NPC spawned successfully!"));
                         return 1;
                     } else {
-                        player.sendSystemMessage(Component.literal("§c✖ Eroare: Nu s-a putut crea entitatea de misiuni!"));
+                        player.sendSystemMessage(Component.literal("§c[EvoJobs] Error: Could not create the quest entity!"));
                         return 0;
                     }
                 })
