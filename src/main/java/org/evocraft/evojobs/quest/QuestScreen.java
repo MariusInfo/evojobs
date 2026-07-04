@@ -10,17 +10,19 @@ import org.evocraft.evojobs.network.S2C_OpenQuestMenu;
 public class QuestScreen extends Screen {
 
     private final S2C_OpenQuestMenu data;
-    private final int guiWidth = 400;
-    private final int guiHeight = 250;
+    private static final int GUI_WIDTH = 460;
+    private static final int GUI_HEIGHT = 300;
 
     // Evo V3.1 Supreme Colors
-    private static final int BG_COLOR = 0xEE0D140D;
-    private static final int BORDER_COLOR = 0xFF83B755;
-    private static final int CARD_BG = 0xAA141C14;
-    private static final int CARD_BORDER = 0xFF3A592D;
-    private static final int CARD_BG_CLAIMED = 0xAA1C3314;
-    private static final int TEXT_COLOR = 0xFFDDDDDD;
-    private static final int PROGRESS_BG = 0xFF111111;
+    private static final int BG_COLOR = 0xF00B120D;
+    private static final int HEADER_BG = 0xAA101A12;
+    private static final int BORDER_COLOR = 0xFF8FD867;
+    private static final int CARD_BG = 0xCC121D14;
+    private static final int CARD_BORDER = 0xFF456936;
+    private static final int CARD_BG_CLAIMED = 0xCC17351A;
+    private static final int TEXT_COLOR = 0xFFEAF1E6;
+    private static final int MUTED_TEXT = 0xFF9BA999;
+    private static final int PROGRESS_BG = 0xEE070907;
     private static final int PROGRESS_FILL = 0xFFFFAA00;
     private static final int PROGRESS_CLAIMED = 0xFF55FF55;
 
@@ -44,25 +46,31 @@ public class QuestScreen extends Screen {
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(g);
+        int guiWidth = Math.min(GUI_WIDTH, this.width - 34);
+        int guiHeight = Math.min(GUI_HEIGHT, this.height - 34);
         int x = (this.width - guiWidth) / 2;
         int y = (this.height - guiHeight) / 2;
 
         // Main Background
         fillRounded(g, x, y, guiWidth, guiHeight, BG_COLOR);
         outlineRounded(g, x, y, guiWidth, guiHeight, BORDER_COLOR);
+        g.fill(x + 2, y + 2, x + guiWidth - 2, y + 38, HEADER_BG);
+        g.fill(x + 18, y + 43, x + guiWidth - 18, y + 44, 0x553A592D);
 
         // Header
         g.pose().pushPose();
-        g.pose().translate(x + guiWidth / 2f, y + 15, 0);
+        g.pose().translate(x + guiWidth / 2f, y + 11, 0);
         g.pose().scale(1.2f, 1.2f, 1.0f);
         g.drawCenteredString(this.font, "§lDAILY QUESTS", 0, 0, BORDER_COLOR);
         g.pose().popPose();
 
-        g.drawCenteredString(this.font, "§7These quests reset every day at midnight.", x + guiWidth / 2, y + 32, 0xAAAAAA);
+        g.drawCenteredString(this.font, "These quests reset every day at midnight.", x + guiWidth / 2, y + 28, MUTED_TEXT);
 
-        int startY = y + 55;
-        int cardHeight = 36;
-        int spacing = 6;
+        int cardX = x + 18;
+        int cardWidth = guiWidth - 36;
+        int startY = y + 56;
+        int cardHeight = 40;
+        int spacing = 7;
 
         for (int i = 0; i < 5; i++) {
             if (i >= data.jobs.size() || data.jobs.get(i).isEmpty()) continue;
@@ -73,32 +81,37 @@ public class QuestScreen extends Screen {
             int req = data.requirements[i];
 
             // Card Background
-            fillRounded(g, x + 15, cardY, guiWidth - 30, cardHeight, isClaimed ? CARD_BG_CLAIMED : CARD_BG);
-            outlineRounded(g, x + 15, cardY, guiWidth - 30, cardHeight, CARD_BORDER);
+            fillRounded(g, cardX, cardY, cardWidth, cardHeight, isClaimed ? CARD_BG_CLAIMED : CARD_BG);
+            outlineRounded(g, cardX, cardY, cardWidth, cardHeight, CARD_BORDER);
 
-            String jobName = data.jobs.get(i).substring(0, 1).toUpperCase() + data.jobs.get(i).substring(1);
+            String jobName = formatJobName(data.jobs.get(i));
             String targetName = data.targets.get(i);
 
             // Draw Icon
             ItemStack icon = getQuestIcon(jobName, targetName);
             g.pose().pushPose();
-            g.pose().translate(x + 22, cardY + 10, 0);
+            g.pose().translate(cardX + 16, cardY + 10, 0);
             g.pose().scale(1.3f, 1.3f, 1.0f);
             g.renderItem(icon, 0, 0);
             g.pose().popPose();
 
+            int barWidth = Math.min(120, Math.max(88, cardWidth / 3));
+            int barX = cardX + cardWidth - barWidth - 16;
+            int barY = cardY + 15;
+            int textX = cardX + 58;
+            int textMaxWidth = Math.max(90, barX - textX - 12);
+
             // Text Info
-            g.drawString(this.font, data.rarities.get(i) + " §8| §f" + jobName + " §8- §7" + targetName, x + 50, cardY + 8, 0xFFFFFF, false);
-            g.drawString(this.font, "§e" + (int)data.money[i] + " Lei §8| §b" + (int)data.xp[i] + " XP", x + 50, cardY + 20, 0xFFFFFF, false);
+            String rarityPrefix = data.rarities.get(i) + " §8| ";
+            int rarityWidth = this.font.width(rarityPrefix);
+            g.drawString(this.font, rarityPrefix, textX, cardY + 8, TEXT_COLOR, false);
+            g.drawString(this.font, fitText("§f" + jobName + " §8- §7" + targetName, textMaxWidth - rarityWidth), textX + rarityWidth, cardY + 8, TEXT_COLOR, false);
+            g.drawString(this.font, "§e" + (int)data.money[i] + " Lei §8| §b" + (int)data.xp[i] + " XP", textX, cardY + 22, TEXT_COLOR, false);
 
             // Progress Bar
-            int barWidth = 110;
-            int barX = x + guiWidth - barWidth - 25;
-            int barY = cardY + 14;
-
             fillRounded(g, barX, barY, barWidth, 10, PROGRESS_BG);
 
-            float pct = Math.min(1.0f, (float)prog / req);
+            float pct = req <= 0 ? 1.0f : Math.min(1.0f, (float)prog / req);
             int fillWidth = (int)(barWidth * pct);
             if (fillWidth > 0) {
                 fillRounded(g, barX, barY, fillWidth, 10, isClaimed ? PROGRESS_CLAIMED : PROGRESS_FILL);
@@ -113,6 +126,24 @@ public class QuestScreen extends Screen {
         }
 
         super.render(g, mouseX, mouseY, partialTick);
+    }
+
+    private String fitText(String text, int maxWidth) {
+        if (maxWidth <= 10) return "";
+        if (this.font.width(text) <= maxWidth) return text;
+        String ellipsis = "...";
+        String trimmed = this.font.plainSubstrByWidth(text, Math.max(10, maxWidth - this.font.width(ellipsis))).stripTrailing();
+        return trimmed + ellipsis;
+    }
+
+    private String formatJobName(String jobId) {
+        if (jobId == null || jobId.isBlank()) return "";
+        return switch (jobId.toLowerCase()) {
+            case "woodcutter" -> "Lumberjack";
+            case "fierar" -> "Blacksmith";
+            case "somer" -> "Unemployed";
+            default -> jobId.substring(0, 1).toUpperCase() + jobId.substring(1);
+        };
     }
 
     // Smart Icon Mapper based on target names
