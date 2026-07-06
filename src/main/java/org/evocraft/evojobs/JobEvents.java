@@ -315,9 +315,9 @@ public class JobEvents {
         }
 
         if (totalMoney > 0) {
-            String moneyFmt = JobProgressionService.formatNumber(totalMoney);
+            String moneyFmt = JobProgressionService.formatMoney(totalMoney);
             String xpFmt = JobProgressionService.formatNumber(totalXp);
-            String rawMsg = "\u00A7a+ " + moneyFmt + " Lei \u00A7f| \u00A7b+ " + xpFmt + " XP \u00A77(" + jobs.toString().trim() + ")";
+            String rawMsg = "\u00A7a+ " + moneyFmt + " \u00A7f| \u00A7b+ " + xpFmt + " XP \u00A77(" + jobs.toString().trim() + ")";
             player.displayClientMessage(Component.literal(rawMsg), true);
             JobManager.get().syncJobsToClient(player);
         }
@@ -362,7 +362,7 @@ public class JobEvents {
                             double xp = JobProgressionService.calculateScaledXpReward(1.0, somerData.level, player);
                             if (money > 0.0) EconomyManager.get().addBalance(player.getUUID(), money);
                             if (xp > 0.0) JobManager.get().addXp(player.getUUID(), "somer", xp);
-                            player.displayClientMessage(Component.literal("\u00A7a+ " + JobProgressionService.formatNumber(money) + " Lei \u00A7f| \u00A7b+ " + JobProgressionService.formatNumber(xp) + " XP \u00A77(Unemployed)"), true);
+                            player.displayClientMessage(Component.literal("\u00A7a+ " + JobProgressionService.formatMoney(money) + " \u00A7f| \u00A7b+ " + JobProgressionService.formatNumber(xp) + " XP \u00A77(Unemployed)"), true);
                             JobManager.get().syncJobsToClient(player);
                         }
                     }

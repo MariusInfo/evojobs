@@ -60,7 +60,7 @@ public class JobPerks {
         if (player.tickCount % 72000 == 0) {
             if (getJobLevel(player, "somer") >= 100 && Math.random() < 0.05) {
                 EconomyManager.get().addBalance(player.getUUID(), 50000.0);
-                player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§6§lJACKPOT! §eYou won the automatic Lottery of 50,000 Lei!"));
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§6§lJACKPOT! §eYou won " + JobProgressionService.formatMoney(50000.0) + " in the automatic lottery!"));
             }
         }
 
@@ -69,7 +69,7 @@ public class JobPerks {
             if (getJobLevel(player, "somer") >= 50 && Math.random() < 0.05) {
                 double found = 10.0 + (Math.random() * 40.0);
                 EconomyManager.get().addBalance(player.getUUID(), found);
-                player.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.format("§aYou found %.2f Lei on the ground while walking!", found)));
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§aYou found " + JobProgressionService.formatMoney(found) + " on the ground while walking!"));
             }
         }
 

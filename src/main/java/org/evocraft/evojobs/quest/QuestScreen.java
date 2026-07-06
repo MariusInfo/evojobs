@@ -5,6 +5,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.evocraft.evojobs.JobProgressionService;
 import org.evocraft.evojobs.network.S2C_OpenQuestMenu;
 
 public class QuestScreen extends Screen {
@@ -106,7 +107,7 @@ public class QuestScreen extends Screen {
             int rarityWidth = this.font.width(rarityPrefix);
             g.drawString(this.font, rarityPrefix, textX, cardY + 8, TEXT_COLOR, false);
             g.drawString(this.font, fitText("§f" + jobName + " §8- §7" + targetName, textMaxWidth - rarityWidth), textX + rarityWidth, cardY + 8, TEXT_COLOR, false);
-            g.drawString(this.font, "§e" + (int)data.money[i] + " Lei §8| §b" + (int)data.xp[i] + " XP", textX, cardY + 22, TEXT_COLOR, false);
+            g.drawString(this.font, "§e" + JobProgressionService.formatMoney(data.money[i]) + " §8| §b" + (int)data.xp[i] + " XP", textX, cardY + 22, TEXT_COLOR, false);
 
             // Progress Bar
             fillRounded(g, barX, barY, barWidth, 10, PROGRESS_BG);

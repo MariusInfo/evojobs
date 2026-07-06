@@ -6,6 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import org.evocraft.evocore.data.EconomyManager;
+import org.evocraft.evocore.util.EvoCurrencyFormatter;
 import org.evocraft.evojobs.JobProgressionConfigManager.JobAttributeConfig;
 import org.evocraft.evojobs.JobProgressionConfigManager.JobBonus;
 import org.evocraft.evojobs.JobProgressionConfigManager.LevelRewardRule;
@@ -201,7 +202,7 @@ public class JobProgressionService {
                 double amount = evaluateRewardFormula(action.amount_formula, player, jobId, level);
                 if (amount > 0.0) {
                     EconomyManager.get().addBalance(player.getUUID(), amount);
-                    player.sendSystemMessage(Component.literal("\u00A7a[EvoJobs] Milestone reward: +" + formatNumber(amount) + " Lei"));
+                    player.sendSystemMessage(Component.literal("\u00A7a[EvoJobs] Milestone reward: +" + formatMoney(amount)));
                 }
             }
             case "COMMAND" -> runCommand(player, replacePlaceholders(action.command, player, jobId, level));
@@ -352,6 +353,10 @@ public class JobProgressionService {
         if (abs >= 1_000.0) return String.format(Locale.US, "%,.0f", value);
         if (abs < 10.0) return String.format(Locale.US, "%.2f", value);
         return String.format(Locale.US, "%.1f", value);
+    }
+
+    public static String formatMoney(double value) {
+        return EvoCurrencyFormatter.formatWithCurrency(value);
     }
 
     public static String formatPercent(double value) {

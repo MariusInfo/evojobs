@@ -15,6 +15,7 @@ import org.evocraft.evocore.data.EconomyManager;
 import org.evocraft.evocore.database.DatabaseManager;
 import org.evocraft.evojobs.Evojobs;
 import org.evocraft.evojobs.JobManager;
+import org.evocraft.evojobs.JobProgressionService;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -372,7 +373,7 @@ public class QuestManager {
                                 JobManager.get().syncJobsToClient(onlinePlayer);
 
                                 onlinePlayer.connection.send(new ClientboundSetTitlesAnimationPacket(10, 70, 20));
-                                onlinePlayer.connection.send(new ClientboundSetSubtitleTextPacket(Component.literal("§a+" + (int)quest.rewardMoney + " Lei §f| §b+" + (int)quest.rewardXp + " XP")));
+                                onlinePlayer.connection.send(new ClientboundSetSubtitleTextPacket(Component.literal("§a+" + JobProgressionService.formatMoney(quest.rewardMoney) + " §f| §b+" + (int)quest.rewardXp + " XP")));
                                 onlinePlayer.connection.send(new ClientboundSetTitleTextPacket(Component.literal("§e§lDAILY QUEST COMPLETED!")));
                                 onlinePlayer.level().playSound(null, onlinePlayer.blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.MASTER, 1.0f, 1.0f);
                             });

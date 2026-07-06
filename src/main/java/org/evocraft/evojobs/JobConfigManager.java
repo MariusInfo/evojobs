@@ -167,7 +167,7 @@ public class JobConfigManager {
                 new String[] {"Fa comert cu satenii.", "Fă comerț cu sătenii."});
         migrateLegacyDefaultText("somer", "Unemployed", "Earn a little by staying idle.",
                 new String[] {"Somer", "Șomer"},
-                new String[] {"Castigi bani stand degeaba.", "Câștigi bani stând degeaba."});
+                new String[] {"Earn Evo while doing nothing.", "Earn passive Evo rewards."});
         migrateLegacyDefaultText("fierar", "Blacksmith", "Repair and rename items.",
                 new String[] {"Fierar"},
                 new String[] {"Repara si redenumeste iteme.", "Repară și redenumește iteme."});
