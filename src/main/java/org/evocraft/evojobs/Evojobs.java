@@ -42,6 +42,7 @@ public class Evojobs {
             LOGGER.info("[EvoJobs] Initializing the job system...");
             JobConfigManager.initialize();
             JobProgressionConfigManager.initialize();
+            JobEnchantCompatConfigManager.initialize();
             JobStationManager.initialize();
             AntiExploitManager.initialize();
             JobManager.initialize();
@@ -60,6 +61,7 @@ public class Evojobs {
         LOGGER.info("[EvoJobs] Serverul porneste. Incarcam config-urile si bazele de date...");
         JobConfigManager.get().load();
         JobProgressionConfigManager.get().load();
+        JobEnchantCompatConfigManager.get().load();
         JobStationManager.get().load();
         AntiExploitManager.get().load();
 

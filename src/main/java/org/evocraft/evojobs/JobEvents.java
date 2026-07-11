@@ -31,6 +31,7 @@ import net.minecraftforge.event.entity.player.ItemFishedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -195,7 +196,7 @@ public class JobEvents {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onFish(ItemFishedEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             for (ItemStack stack : event.getDrops()) {
@@ -298,8 +299,10 @@ public class JobEvents {
                 double safeMultiplier = Double.isFinite(multiplier) && multiplier > 0.0 ? multiplier : 0.0;
 
                 double baseMoney = basePrice * safeMultiplier;
-                double baseXp = basePrice * JobProgressionService.getBaseXpMultiplier(jobId) * safeMultiplier;
-                double finalMoney = JobProgressionService.calculateScaledMoneyReward(baseMoney, data.level, player, rankMultiplier);
+                double enchantXpMultiplier = JobEnchantCompatService.getXpMultiplier(player, actionType, jobId);
+                double enchantMoneyMultiplier = JobEnchantCompatService.getMoneyMultiplier(player, actionType, jobId);
+                double baseXp = basePrice * JobProgressionService.getBaseXpMultiplier(jobId) * safeMultiplier * enchantXpMultiplier;
+                double finalMoney = JobProgressionService.calculateScaledMoneyReward(baseMoney, data.level, player, rankMultiplier * enchantMoneyMultiplier);
                 double xpGain = JobProgressionService.calculateScaledXpReward(baseXp, data.level, player);
 
                 if (finalMoney > 0.0) EconomyManager.get().addBalance(player.getUUID(), finalMoney);

@@ -34,6 +34,7 @@ public class JobNPCEntity extends PathfinderMob {
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!this.level().isClientSide() && hand == InteractionHand.MAIN_HAND) {
+            ensureEnglishName();
             NetworkHooks.openScreen((ServerPlayer) player, new SimpleMenuProvider(
                     (id, inv, p) -> new JobMenu(id, inv),
                     Component.literal("Jobs")
@@ -41,6 +42,22 @@ public class JobNPCEntity extends PathfinderMob {
             return InteractionResult.SUCCESS;
         }
         return super.mobInteract(player, hand);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!this.level().isClientSide() && this.tickCount % 40 == 0) {
+            ensureEnglishName();
+        }
+    }
+
+    private void ensureEnglishName() {
+        String current = this.getDisplayName().getString();
+        if (!current.contains("Job Center")) {
+            this.setCustomName(Component.literal("§e§lJob Center"));
+            this.setCustomNameVisible(true);
+        }
     }
 
     @Override
