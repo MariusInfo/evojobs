@@ -40,10 +40,15 @@ public class MajruszHarvesterCompatEvents {
         if (event.isCanceled() || event.getLevel().isClientSide()) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
+        captureHarvesterUse(player, event.getLevel(), event.getItemStack(), event.getPos());
+    }
+
+    static void captureHarvesterUse(ServerPlayer player, Level level, ItemStack stack, BlockPos clickedPos) {
+        if (player == null || level == null || level.isClientSide()) return;
+
         JobEnchantCompatConfigManager.HarvesterCompat cfg = JobEnchantCompatConfigManager.get().config().harvester;
         if (!cfg.enabled) return;
 
-        ItemStack stack = event.getItemStack();
         if (stack.isEmpty() || !(stack.getItem() instanceof HoeItem)) return;
 
         Enchantment enchantment = getConfiguredEnchantment(cfg.enchantment_id);
@@ -52,8 +57,7 @@ public class MajruszHarvesterCompatEvents {
         int enchantLevel = stack.getEnchantmentLevel(enchantment);
         if (enchantLevel <= 0) return;
 
-        BlockPos clickedPos = event.getPos();
-        BlockState clickedState = event.getLevel().getBlockState(clickedPos);
+        BlockState clickedState = level.getBlockState(clickedPos);
         if (!isMatureCrop(clickedState)) return;
 
         long nowTick = player.getServer() != null ? player.getServer().getTickCount() : player.tickCount;
@@ -67,7 +71,7 @@ public class MajruszHarvesterCompatEvents {
         int radius = Math.max(0, enchantLevel * Math.max(0, cfg.radius_per_level) + cfg.radius_offset);
         radius = Math.min(radius, Math.max(0, cfg.max_radius));
 
-        List<CropSnapshot> snapshots = collectMatureCrops(event.getLevel(), clickedPos, radius, cfg.max_crops_per_use);
+        List<CropSnapshot> snapshots = collectMatureCrops(level, clickedPos, radius, cfg.max_crops_per_use);
         if (snapshots.isEmpty()) return;
 
         long executeTick = nowTick + Math.max(1, cfg.reward_delay_ticks);

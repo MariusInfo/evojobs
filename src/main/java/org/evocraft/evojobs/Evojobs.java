@@ -43,6 +43,7 @@ public class Evojobs {
             JobConfigManager.initialize();
             JobProgressionConfigManager.initialize();
             JobEnchantCompatConfigManager.initialize();
+            MajruszEnchantCompatBridge.initialize();
             JobStationManager.initialize();
             AntiExploitManager.initialize();
             JobManager.initialize();
