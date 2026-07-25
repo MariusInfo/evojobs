@@ -185,6 +185,7 @@ public class JobProgressionConfigManager {
 
     private void validateConfig(ProgressionConfig cfg) {
         if (cfg.progression == null) cfg.progression = new ProgressionSettings();
+        if (cfg.reward_display == null) cfg.reward_display = new RewardDisplaySettings();
         if (cfg.progression.required_xp == null) cfg.progression.required_xp = new RequiredXpSettings();
         if (cfg.progression.xp_reward == null) cfg.progression.xp_reward = new SqrtScalingSettings();
         if (cfg.progression.money_reward == null) cfg.progression.money_reward = new SqrtScalingSettings();
@@ -207,11 +208,16 @@ public class JobProgressionConfigManager {
         if (!isNonNegativeFinite(cfg.progression.money_reward.sqrt_multiplier)) cfg.progression.money_reward.sqrt_multiplier = 0.2;
         if (!isNonNegativeFinite(cfg.progression.job_attribute.base_multiplier)) cfg.progression.job_attribute.base_multiplier = 2.0;
         if (!isPositiveFinite(cfg.progression.base_xp_multipliers.default_multiplier)) cfg.progression.base_xp_multipliers.default_multiplier = 2.0;
+        if (!isNonNegativeFinite(cfg.reward_display.accumulation_window_seconds)) {
+            warn("reward_display.accumulation_window_seconds must be >= 0. Falling back to 3.0");
+            cfg.reward_display.accumulation_window_seconds = 3.0;
+        }
 
         cfg.synergy.reward_mode = normalizeRewardMode(cfg.synergy.reward_mode);
         validateMilestones("total_job_level", cfg.total_job_level.milestones);
         validateMilestones("synergy", cfg.synergy.milestones);
         validateLevelRewards(cfg);
+        cfg.dataVersion = Math.max(cfg.dataVersion, 3);
     }
 
     private void validateMilestones(String path, Map<String, JobBonus> milestones) {
@@ -279,12 +285,17 @@ public class JobProgressionConfigManager {
     }
 
     public static class ProgressionConfig {
-        public int dataVersion = 2;
+        public int dataVersion = 3;
         public ProgressionSettings progression = new ProgressionSettings();
+        public RewardDisplaySettings reward_display = new RewardDisplaySettings();
         public TotalLevelSettings total_job_level = new TotalLevelSettings();
         public SynergySettings synergy = new SynergySettings();
         public Map<String, JobAttributeConfig> job_attributes = new LinkedHashMap<>();
         public Map<String, LevelRewardRule> level_rewards = new LinkedHashMap<>();
+    }
+
+    public static class RewardDisplaySettings {
+        public double accumulation_window_seconds = 3.0;
     }
 
     public static class ProgressionSettings {

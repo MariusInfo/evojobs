@@ -39,6 +39,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = "evojobs", bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class JobEvents {
@@ -279,7 +281,7 @@ public class JobEvents {
 
         double totalMoney = 0;
         double totalXp = 0;
-        StringBuilder jobs = new StringBuilder();
+        Set<String> jobs = new LinkedHashSet<>();
 
         for (String jobId : activeJobs.keySet()) {
             if (forcedJobId != null && !jobId.equals(forcedJobId)) continue;
@@ -313,15 +315,12 @@ public class JobEvents {
 
                 totalMoney += finalMoney;
                 totalXp += xpGain;
-                if (!jobs.toString().contains(jobDef.displayName)) jobs.append(jobDef.displayName).append(" ");
+                jobs.add(jobDef.displayName);
             }
         }
 
-        if (totalMoney > 0) {
-            String moneyFmt = JobProgressionService.formatMoney(totalMoney);
-            String xpFmt = JobProgressionService.formatNumber(totalXp);
-            String rawMsg = "\u00A7a+ " + moneyFmt + " \u00A7f| \u00A7b+ " + xpFmt + " XP \u00A77(" + jobs.toString().trim() + ")";
-            player.displayClientMessage(Component.literal(rawMsg), true);
+        if (totalMoney > 0.0 || totalXp > 0.0) {
+            JobRewardDisplayAccumulator.addAndDisplay(player, totalMoney, totalXp, jobs);
             JobManager.get().syncJobsToClient(player);
         }
     }
@@ -329,6 +328,7 @@ public class JobEvents {
     @SubscribeEvent
     public static void onPlayerJoin(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            JobRewardDisplayAccumulator.reset(player.getUUID());
             if (player.getServer() != null) {
                 player.getServer().tell(new net.minecraft.server.TickTask(player.getServer().getTickCount() + 10, () -> {
                     try {
@@ -342,8 +342,14 @@ public class JobEvents {
     }
 
     @SubscribeEvent
+    public static void onPlayerLogout(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+        JobRewardDisplayAccumulator.reset(event.getEntity().getUUID());
+    }
+
+    @SubscribeEvent
     public static void onServerTick(net.minecraftforge.event.TickEvent.ServerTickEvent event) {
         if (event.phase == net.minecraftforge.event.TickEvent.Phase.END && event.getServer().getTickCount() % 100 == 0) {
+            JobRewardDisplayAccumulator.cleanup(event.getServer().getTickCount());
             JobManager manager = JobManager.get();
             if (manager != null) {
                 manager.flushDirtySaves(false);
@@ -365,7 +371,8 @@ public class JobEvents {
                             double xp = JobProgressionService.calculateScaledXpReward(1.0, somerData.level, player);
                             if (money > 0.0) EconomyManager.get().addBalance(player.getUUID(), money);
                             if (xp > 0.0) JobManager.get().addXp(player.getUUID(), "somer", xp);
-                            player.displayClientMessage(Component.literal("\u00A7a+ " + JobProgressionService.formatMoney(money) + " \u00A7f| \u00A7b+ " + JobProgressionService.formatNumber(xp) + " XP \u00A77(Unemployed)"), true);
+                            JobRewardDisplayAccumulator.addAndDisplay(
+                                    player, money, xp, java.util.List.of("Unemployed"));
                             JobManager.get().syncJobsToClient(player);
                         }
                     }
