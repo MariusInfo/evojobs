@@ -260,6 +260,16 @@ public class JobProgressionService {
         return Math.max(1.0, xp ? boosts.xpMultiplier : boosts.moneyMultiplier);
     }
 
+    public static void clearTemporaryBoost(UUID uuid) {
+        if (uuid != null) {
+            TEMPORARY_BOOSTS.remove(uuid);
+        }
+    }
+
+    public static void clearAllTemporaryBoosts() {
+        TEMPORARY_BOOSTS.clear();
+    }
+
     private static double evaluateRewardFormula(String formula, ServerPlayer player, String jobId, long level) {
         if (formula == null || formula.trim().isEmpty()) return 0.0;
         Map<String, Double> vars = new HashMap<>();

@@ -45,15 +45,18 @@ import java.util.Set;
 @Mod.EventBusSubscriber(modid = "evojobs", bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class JobEvents {
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
+        if (event.isCanceled()) return;
         if (event.getEntity() instanceof ServerPlayer player) {
             AntiExploitManager.get().markBlockPlaced(player.level(), event.getPos());
+            if (player.isCreative() || player.isSpectator()) return;
             if (player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty()) return;
             Block block = event.getPlacedBlock().getBlock();
 
             if (block instanceof CropBlock || block instanceof BushBlock ||
                     block instanceof SaplingBlock || block instanceof FlowerBlock ||
+                    block instanceof net.minecraft.world.level.block.NetherWartBlock ||
                     block == Blocks.SUGAR_CANE || block == Blocks.CACTUS || block == Blocks.BAMBOO ||
                     block == Blocks.KELP || block == Blocks.SEA_PICKLE) {
                 return;
@@ -64,20 +67,30 @@ public class JobEvents {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
+        if (event.isCanceled()) return;
         if (event.getPlayer() instanceof ServerPlayer player) {
 
             BlockState state = event.getState();
             Block block = state.getBlock();
             ResourceLocation key = ForgeRegistries.BLOCKS.getKey(block);
 
-            boolean isCrop = block instanceof CropBlock || block instanceof SweetBerryBushBlock || block instanceof CocoaBlock;
+            if (player.isCreative() || player.isSpectator()) {
+                AntiExploitManager.get().isExploitAndRemove(player.level(), event.getPos());
+                return;
+            }
+
+            boolean isCrop = block instanceof CropBlock
+                    || block instanceof SweetBerryBushBlock
+                    || block instanceof CocoaBlock
+                    || block instanceof net.minecraft.world.level.block.NetherWartBlock;
 
             if (isCrop) {
                 if (block instanceof CropBlock crop && !crop.isMaxAge(state)) return;
                 if (block instanceof SweetBerryBushBlock && state.getValue(SweetBerryBushBlock.AGE) < 3) return;
                 if (block instanceof CocoaBlock && state.getValue(CocoaBlock.AGE) < 2) return;
+                if (block instanceof net.minecraft.world.level.block.NetherWartBlock && state.getValue(net.minecraft.world.level.block.NetherWartBlock.AGE) < 3) return;
 
                 AntiExploitManager.get().isExploitAndRemove(player.level(), event.getPos());
                 if (key != null) {
@@ -129,14 +142,16 @@ public class JobEvents {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onVillagerTrade(net.minecraftforge.event.entity.player.TradeWithVillagerEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) processJobAction(player, "TRADE", "*", 1.0, "trader");
+        if (event.getEntity() instanceof ServerPlayer player && !player.isCreative() && !player.isSpectator()) {
+            processJobAction(player, "TRADE", "*", 1.0, "trader");
+        }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onItemCraft(PlayerEvent.ItemCraftedEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
+        if (event.getEntity() instanceof ServerPlayer player && !player.isCreative() && !player.isSpectator()) {
             ResourceLocation key = ForgeRegistries.ITEMS.getKey(event.getCrafting().getItem());
             if (key != null) {
                 String itemId = key.toString();
@@ -182,16 +197,18 @@ public class JobEvents {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onAnvilRepair(AnvilRepairEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
+        if (event.getEntity() instanceof ServerPlayer player && !player.isCreative() && !player.isSpectator()) {
+            if (event.getLeft().isEmpty() || event.getRight().isEmpty()) return;
             processJobAction(player, "USE_ANVIL", "*", 1.0, "fierar");
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onLivingDeath(LivingDeathEvent event) {
-        if (event.getSource().getEntity() instanceof ServerPlayer player) {
+        if (event.isCanceled()) return;
+        if (event.getSource().getEntity() instanceof ServerPlayer player && !player.isCreative() && !player.isSpectator()) {
             ResourceLocation key = ForgeRegistries.ENTITY_TYPES.getKey(event.getEntity().getType());
             String entityId = (key != null) ? key.toString() : "unknown";
             processJobAction(player, "KILL", entityId, 1.0, "hunter");
@@ -200,7 +217,8 @@ public class JobEvents {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onFish(ItemFishedEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
+        if (event.isCanceled()) return;
+        if (event.getEntity() instanceof ServerPlayer player && !player.isCreative() && !player.isSpectator()) {
             for (ItemStack stack : event.getDrops()) {
                 ResourceLocation key = ForgeRegistries.ITEMS.getKey(stack.getItem());
                 if (key != null) processJobAction(player, "FISH", key.toString(), stack.getCount(), "fisherman");
@@ -208,17 +226,19 @@ public class JobEvents {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onBabySpawn(BabyEntitySpawnEvent event) {
-        if (event.getCausedByPlayer() instanceof ServerPlayer player) {
+        if (event.isCanceled()) return;
+        if (event.getCausedByPlayer() instanceof ServerPlayer player && !player.isCreative() && !player.isSpectator()) {
             ResourceLocation key = ForgeRegistries.ENTITY_TYPES.getKey(event.getParentA().getType());
             if (key != null) processJobAction(player, "BREED", key.toString(), 1.0, "farmer");
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onTame(AnimalTameEvent event) {
-        if (event.getTamer() instanceof ServerPlayer player) {
+        if (event.isCanceled()) return;
+        if (event.getTamer() instanceof ServerPlayer player && !player.isCreative() && !player.isSpectator()) {
             ResourceLocation key = ForgeRegistries.ENTITY_TYPES.getKey(event.getAnimal().getType());
             if (key != null) processJobAction(player, "TAME", key.toString(), 1.0, "farmer");
         }
@@ -226,6 +246,7 @@ public class JobEvents {
 
     @SubscribeEvent
     public static void onBlockInteract(PlayerInteractEvent.RightClickBlock event) {
+        if (event.isCanceled() || event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) return;
         if (!event.getLevel().isClientSide() && event.getEntity() instanceof ServerPlayer player) {
             net.minecraft.core.BlockPos pos = event.getPos();
 
@@ -360,9 +381,9 @@ public class JobEvents {
     @SubscribeEvent
     public static void onPlayerTick(net.minecraftforge.event.TickEvent.PlayerTickEvent event) {
         if (event.side.isServer() && event.phase == net.minecraftforge.event.TickEvent.Phase.END) {
-            if (event.player instanceof ServerPlayer player) {
+            if (event.player instanceof ServerPlayer player && !player.isSpectator() && !player.isCreative()) {
                 if (player.tickCount % 100 == 0) {
-                    if (player.isPassenger()) {
+                    if (player.isPassenger() && JobManager.get() != null) {
                         Map<String, JobData> activeJobs = JobManager.get().getActiveJobs(player.getUUID());
                         if (activeJobs.containsKey("somer")) {
                             JobData somerData = activeJobs.get("somer");

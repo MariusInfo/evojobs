@@ -58,18 +58,18 @@ public class S2C_SyncJobsPacket {
         totalJobLevel = buf.readLong();
         synergyLevel = buf.readLong();
         jobs = new ArrayList<>();
-        int size = buf.readInt();
+        int size = Math.max(0, Math.min(buf.readInt(), 128));
         for (int i = 0; i < size; i++) {
             jobs.add(new JobSyncData(
-                    buf.readUtf(),
+                    buf.readUtf(128),
                     buf.readLong(),
                     buf.readDouble(),
                     buf.readDouble(),
-                    buf.readUtf(),
+                    buf.readUtf(128),
                     buf.readBoolean(),
                     buf.readDouble(),
                     buf.readDouble(),
-                    buf.readUtf(),
+                    buf.readUtf(128),
                     buf.readDouble(),
                     buf.readDouble()
             ));
@@ -81,15 +81,15 @@ public class S2C_SyncJobsPacket {
         buf.writeLong(synergyLevel);
         buf.writeInt(jobs.size());
         for (JobSyncData job : jobs) {
-            buf.writeUtf(job.name != null ? job.name : "Unknown");
+            buf.writeUtf(job.name != null ? job.name : "Unknown", 128);
             buf.writeLong(Math.max(1L, job.level));
             buf.writeDouble(job.currentXp);
             buf.writeDouble(job.requiredXp);
-            buf.writeUtf(job.iconId != null ? job.iconId : "minecraft:paper");
+            buf.writeUtf(job.iconId != null ? job.iconId : "minecraft:paper", 128);
             buf.writeBoolean(job.isActive);
             buf.writeDouble(job.xpMultiplier);
             buf.writeDouble(job.moneyMultiplier);
-            buf.writeUtf(job.attributeName != null ? job.attributeName : "Job Attribute");
+            buf.writeUtf(job.attributeName != null ? job.attributeName : "Job Attribute", 128);
             buf.writeDouble(job.attributePower);
             buf.writeDouble(job.attributeEffectPercent);
         }
@@ -98,13 +98,16 @@ public class S2C_SyncJobsPacket {
     public boolean handle(Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
+            if (!context.getDirection().getReceptionSide().isClient()) return;
             List<JobInfo> clientJobs = new ArrayList<>();
             for (JobSyncData data : jobs) {
                 ItemStack icon = new ItemStack(Items.PAPER);
                 if (data.iconId != null && !data.iconId.isEmpty()) {
-                    String[] parts = data.iconId.split(":");
-                    ResourceLocation loc = parts.length == 2 ? new ResourceLocation(parts[0], parts[1]) : new ResourceLocation("minecraft", parts[0]);
-                    var item = ForgeRegistries.ITEMS.getValue(loc);
+                    String[] parts = data.iconId.split(":", 2);
+                    ResourceLocation loc = parts.length == 2
+                            ? ResourceLocation.tryBuild(parts[0], parts[1])
+                            : ResourceLocation.tryBuild("minecraft", parts[0]);
+                    var item = loc != null ? ForgeRegistries.ITEMS.getValue(loc) : null;
                     if (item != null) icon = new ItemStack(item);
                 }
                 clientJobs.add(new JobInfo(

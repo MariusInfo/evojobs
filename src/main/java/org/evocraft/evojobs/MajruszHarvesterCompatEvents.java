@@ -35,6 +35,19 @@ public class MajruszHarvesterCompatEvents {
     private static final Map<UUID, List<PendingHarvest>> PENDING = new ConcurrentHashMap<>();
     private static final Map<String, Long> COOLDOWNS = new ConcurrentHashMap<>();
 
+    public static void clearPlayer(UUID uuid) {
+        if (uuid != null) {
+            PENDING.remove(uuid);
+            String prefix = uuid + "|";
+            COOLDOWNS.keySet().removeIf(k -> k.startsWith(prefix));
+        }
+    }
+
+    public static void clearAll() {
+        PENDING.clear();
+        COOLDOWNS.clear();
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (event.isCanceled() || event.getLevel().isClientSide()) return;
@@ -45,6 +58,7 @@ public class MajruszHarvesterCompatEvents {
 
     static void captureHarvesterUse(ServerPlayer player, Level level, ItemStack stack, BlockPos clickedPos) {
         if (player == null || level == null || level.isClientSide()) return;
+        if (player.isCreative() || player.isSpectator()) return;
 
         JobEnchantCompatConfigManager.HarvesterCompat cfg = JobEnchantCompatConfigManager.get().config().harvester;
         if (!cfg.enabled) return;

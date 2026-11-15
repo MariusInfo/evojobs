@@ -128,7 +128,9 @@ public class JobScreen extends AbstractContainerScreen<JobMenu> {
         g.drawCenteredString(this.font, "EVO JOBS", 0, 0, BORDER_COLOR);
         g.pose().popPose();
 
-        int maxPages = (this.menu.availableJobs.size() - 1) / 12;
+        int totalVisibleJobs = Math.min(this.menu.availableJobs.size(), this.menu.container.getContainerSize());
+        int maxPages = totalVisibleJobs <= 0 ? 0 : (totalVisibleJobs - 1) / 12;
+        if (currentPage > maxPages) currentPage = maxPages;
 
         btnPrev.visible = maxPages > 0 && currentPage > 0;
         btnNext.visible = maxPages > 0 && currentPage < maxPages;
@@ -156,7 +158,7 @@ public class JobScreen extends AbstractContainerScreen<JobMenu> {
         int startX = 15, startY = 15;
 
         int startIndex = currentPage * 12;
-        int endIndex = Math.min(startIndex + 12, this.menu.availableJobs.size());
+        int endIndex = Math.min(startIndex + 12, totalVisibleJobs);
 
         for (int i = startIndex; i < endIndex; i++) {
             Slot slot = this.menu.slots.get(i);
@@ -222,7 +224,7 @@ public class JobScreen extends AbstractContainerScreen<JobMenu> {
             g.pose().popPose();
         }
 
-        boolean showInfo = currentSlide > 0.01f && selectedVisualSlot != -1;
+        boolean showInfo = currentSlide > 0.01f && selectedVisualSlot >= 0 && selectedVisualSlot < totalVisibleJobs;
         btnAction.visible = showInfo;
 
         if (showInfo) {
@@ -358,8 +360,9 @@ public class JobScreen extends AbstractContainerScreen<JobMenu> {
 
         int cardW = 150, cardH = 60, gapX = 10, gapY = 10;
         int startX = 15, startY = 15;
+        int totalVisibleJobs = Math.min(this.menu.availableJobs.size(), this.menu.container.getContainerSize());
         int startIndex = currentPage * 12;
-        int endIndex = Math.min(startIndex + 12, this.menu.availableJobs.size());
+        int endIndex = Math.min(startIndex + 12, totalVisibleJobs);
 
         for (int i = startIndex; i < endIndex; i++) {
             Slot slot = this.menu.slots.get(i);

@@ -29,6 +29,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class JobManager {
@@ -39,16 +42,19 @@ public class JobManager {
     private static final int MAX_LEVEL_UPS_PER_XP_GAIN = 10_000;
     private static final int[] ACHIEVEMENT_LEVELS = {5, 10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 100};
 
-    private final Map<UUID, Map<String, JobData>> playerJobs = new HashMap<>();
+    private final Map<UUID, Map<String, JobData>> playerJobs = new ConcurrentHashMap<>();
     private final Set<String> dirtyJobSaves = ConcurrentHashMap.newKeySet();
-    private long lastDirtyFlushMs = 0L;
-    private boolean dataVersionColumnAvailable = true;
+    private volatile long lastDirtyFlushMs = 0L;
+    private volatile boolean dataVersionColumnAvailable = true;
+    private volatile boolean dbLoaded = false;
+    private ExecutorService dbExecutor;
 
     public JobManager() {
+        ensureDbExecutor();
         loadAllFromDatabase();
     }
 
-    public static void initialize() {
+    public static synchronized void initialize() {
         if (INSTANCE == null) INSTANCE = new JobManager();
     }
 
@@ -56,42 +62,62 @@ public class JobManager {
         return INSTANCE;
     }
 
-    public void loadAllFromDatabase() {
-        playerJobs.clear();
-        Connection conn = DatabaseManager.get().getConnection();
-        if (conn == null) return;
-
-        migrateDatabaseSchema(conn);
-
-        String query = "SELECT * FROM player_jobs";
-        int legacyRowsQueued = 0;
-        try (PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                UUID uuid = UUID.fromString(rs.getString("uuid"));
-                String jobId = rs.getString("job_id");
-                if (jobId == null || jobId.isBlank()) continue;
-                jobId = jobId.toLowerCase(Locale.ROOT);
-
-                JobData data = new JobData();
-                data.level = Math.max(1L, rs.getLong("level"));
-                data.xp = sanitizeXp(rs.getDouble("xp"));
-                data.isActive = rs.getBoolean("is_active");
-
-                playerJobs.computeIfAbsent(uuid, k -> new HashMap<>()).put(jobId, data);
-                if (readDataVersion(rs) < DATA_VERSION) {
-                    queueJobSave(uuid, jobId);
-                    legacyRowsQueued++;
-                }
-            }
-            System.out.println("[EvoJobs] Jobs have been loaded from the MariaDB/MySQL Database!");
-        } catch (Exception e) {
-            e.printStackTrace();
+    private synchronized ExecutorService ensureDbExecutor() {
+        if (dbExecutor == null || dbExecutor.isShutdown()) {
+            dbExecutor = Executors.newSingleThreadExecutor(task -> {
+                Thread thread = new Thread(task, "EvoJobs-DB");
+                thread.setDaemon(true);
+                return thread;
+            });
         }
+        return dbExecutor;
+    }
 
-        if (legacyRowsQueued > 0) {
-            flushDirtySaves(true);
-            System.out.println("[EvoJobs] Migrated " + legacyRowsQueued + " legacy player job rows to data_version " + DATA_VERSION + " without resetting level or XP.");
+    public void ensureLoaded() {
+        if (!dbLoaded) {
+            loadAllFromDatabase();
+        }
+    }
+
+    public void loadAllFromDatabase() {
+        synchronized (DatabaseManager.get()) {
+            Connection conn = DatabaseManager.get().getConnection();
+            if (conn == null) return;
+
+            playerJobs.clear();
+            migrateDatabaseSchema(conn);
+
+            String query = "SELECT * FROM player_jobs";
+            int legacyRowsQueued = 0;
+            try (PreparedStatement stmt = conn.prepareStatement(query);
+                 ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    UUID uuid = UUID.fromString(rs.getString("uuid"));
+                    String jobId = rs.getString("job_id");
+                    if (jobId == null || jobId.isBlank()) continue;
+                    jobId = jobId.toLowerCase(Locale.ROOT);
+
+                    JobData data = new JobData();
+                    data.level = Math.max(1L, rs.getLong("level"));
+                    data.xp = sanitizeXp(rs.getDouble("xp"));
+                    data.isActive = rs.getBoolean("is_active");
+
+                    playerJobs.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>()).put(jobId, data);
+                    if (readDataVersion(rs) < DATA_VERSION) {
+                        queueJobSave(uuid, jobId);
+                        legacyRowsQueued++;
+                    }
+                }
+                dbLoaded = true;
+                System.out.println("[EvoJobs] Jobs have been loaded from database (" + (DatabaseManager.get().isMySql() ? "MariaDB/MySQL" : "SQLite") + ")!");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (legacyRowsQueued > 0) {
+                flushDirtySavesSync();
+                System.out.println("[EvoJobs] Migrated " + legacyRowsQueued + " legacy player job rows to data_version " + DATA_VERSION + " without resetting level or XP.");
+            }
         }
     }
 
@@ -113,21 +139,17 @@ public class JobManager {
             e.printStackTrace();
         }
 
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute("ALTER TABLE player_jobs MODIFY level BIGINT NOT NULL DEFAULT 1");
-        } catch (Exception e) {
-            System.out.println("[EvoJobs] Schema migration warning: could not alter player_jobs.level to BIGINT. Existing schema may already be compatible.");
+        if (DatabaseManager.get().isMySql()) {
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute("ALTER TABLE player_jobs MODIFY level BIGINT NOT NULL DEFAULT 1");
+            } catch (Exception e) {
+                System.out.println("[EvoJobs] Schema migration warning: could not alter player_jobs.level to BIGINT. Existing schema may already be compatible.");
+            }
         }
 
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute("ALTER TABLE player_jobs ADD COLUMN data_version INT NOT NULL DEFAULT 1");
-            dataVersionColumnAvailable = true;
-        } catch (Exception e) {
-            String message = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
-            dataVersionColumnAvailable = message.contains("duplicate") || message.contains("exists");
-            if (!dataVersionColumnAvailable) {
-                System.out.println("[EvoJobs] Schema migration warning: data_version column is not available. Saving in legacy format.");
-            }
+        dataVersionColumnAvailable = DatabaseManager.get().ensureColumn("player_jobs", "data_version", "INT NOT NULL DEFAULT 1");
+        if (!dataVersionColumnAvailable) {
+            System.out.println("[EvoJobs] Schema migration warning: data_version column is not available. Saving in legacy format.");
         }
     }
 
@@ -172,36 +194,56 @@ public class JobManager {
     }
 
     public boolean saveJobToDatabase(UUID uuid, String jobId, JobData data) {
-        Connection conn = DatabaseManager.get().getConnection();
-        if (conn == null) return false;
-
-        String query = dataVersionColumnAvailable
-                ? "INSERT INTO player_jobs (uuid, player_name, job_id, level, xp, is_active, data_version) VALUES (?, ?, ?, ?, ?, ?, ?) " +
-                "ON DUPLICATE KEY UPDATE " +
-                "player_name = IF(VALUES(player_name) IN ('Offline', 'Unknown', 'Necunoscut'), player_name, VALUES(player_name)), " +
-                "level = VALUES(level), xp = VALUES(xp), is_active = VALUES(is_active), data_version = VALUES(data_version)"
-                : "INSERT INTO player_jobs (uuid, player_name, job_id, level, xp, is_active) VALUES (?, ?, ?, ?, ?, ?) " +
-                "ON DUPLICATE KEY UPDATE " +
-                "player_name = IF(VALUES(player_name) IN ('Offline', 'Unknown', 'Necunoscut'), player_name, VALUES(player_name)), " +
-                "level = VALUES(level), xp = VALUES(xp), is_active = VALUES(is_active)";
-
         String playerName = resolvePlayerName(uuid);
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, uuid.toString());
-            stmt.setString(2, playerName);
-            stmt.setString(3, jobId);
-            stmt.setLong(4, Math.max(1L, data.level));
-            stmt.setDouble(5, sanitizeXp(data.xp));
-            stmt.setBoolean(6, data.isActive);
-            if (dataVersionColumnAvailable) {
-                stmt.setInt(7, DATA_VERSION);
+        return saveJobToDatabase(uuid, playerName, jobId, Math.max(1L, data.level), sanitizeXp(data.xp), data.isActive);
+    }
+
+    private boolean saveJobToDatabase(UUID uuid, String playerName, String jobId, long level, double xp, boolean isActive) {
+        synchronized (DatabaseManager.get()) {
+            Connection conn = DatabaseManager.get().getConnection();
+            if (conn == null) return false;
+
+            boolean isMySql = DatabaseManager.get().isMySql();
+            String query;
+            if (isMySql) {
+                query = dataVersionColumnAvailable
+                        ? "INSERT INTO player_jobs (uuid, player_name, job_id, level, xp, is_active, data_version) VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                        "ON DUPLICATE KEY UPDATE " +
+                        "player_name = IF(VALUES(player_name) IN ('Offline', 'Unknown', 'Necunoscut'), player_name, VALUES(player_name)), " +
+                        "level = VALUES(level), xp = VALUES(xp), is_active = VALUES(is_active), data_version = VALUES(data_version)"
+                        : "INSERT INTO player_jobs (uuid, player_name, job_id, level, xp, is_active) VALUES (?, ?, ?, ?, ?, ?) " +
+                        "ON DUPLICATE KEY UPDATE " +
+                        "player_name = IF(VALUES(player_name) IN ('Offline', 'Unknown', 'Necunoscut'), player_name, VALUES(player_name)), " +
+                        "level = VALUES(level), xp = VALUES(xp), is_active = VALUES(is_active)";
+            } else {
+                query = dataVersionColumnAvailable
+                        ? "INSERT INTO player_jobs (uuid, player_name, job_id, level, xp, is_active, data_version) VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                        "ON CONFLICT(uuid, job_id) DO UPDATE SET " +
+                        "player_name = CASE WHEN excluded.player_name IN ('Offline', 'Unknown', 'Necunoscut') THEN player_jobs.player_name ELSE excluded.player_name END, " +
+                        "level = excluded.level, xp = excluded.xp, is_active = excluded.is_active, data_version = excluded.data_version"
+                        : "INSERT INTO player_jobs (uuid, player_name, job_id, level, xp, is_active) VALUES (?, ?, ?, ?, ?, ?) " +
+                        "ON CONFLICT(uuid, job_id) DO UPDATE SET " +
+                        "player_name = CASE WHEN excluded.player_name IN ('Offline', 'Unknown', 'Necunoscut') THEN player_jobs.player_name ELSE excluded.player_name END, " +
+                        "level = excluded.level, xp = excluded.xp, is_active = excluded.is_active";
             }
-            stmt.executeUpdate();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, uuid.toString());
+                stmt.setString(2, playerName);
+                stmt.setString(3, jobId);
+                stmt.setLong(4, Math.max(1L, level));
+                stmt.setDouble(5, sanitizeXp(xp));
+                stmt.setBoolean(6, isActive);
+                if (dataVersionColumnAvailable) {
+                    stmt.setInt(7, DATA_VERSION);
+                }
+                stmt.executeUpdate();
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     private String resolvePlayerName(UUID uuid) {
@@ -219,9 +261,22 @@ public class JobManager {
     }
 
     private void saveJobNowOrQueue(UUID uuid, String jobId, JobData data) {
-        if (!saveJobToDatabase(uuid, jobId, data)) {
-            queueJobSave(uuid, jobId);
+        String playerName = resolvePlayerName(uuid);
+        long levelSnapshot = Math.max(1L, data.level);
+        double xpSnapshot = sanitizeXp(data.xp);
+        boolean activeSnapshot = data.isActive;
+        ExecutorService executor = ensureDbExecutor();
+        if (executor.isShutdown()) {
+            if (!saveJobToDatabase(uuid, playerName, jobId, levelSnapshot, xpSnapshot, activeSnapshot)) {
+                queueJobSave(uuid, jobId);
+            }
+            return;
         }
+        executor.execute(() -> {
+            if (!saveJobToDatabase(uuid, playerName, jobId, levelSnapshot, xpSnapshot, activeSnapshot)) {
+                queueJobSave(uuid, jobId);
+            }
+        });
     }
 
     private void queueJobSave(UUID uuid, String jobId) {
@@ -236,26 +291,31 @@ public class JobManager {
         lastDirtyFlushMs = now;
 
         List<String> keysToSave = new ArrayList<>(dirtyJobSaves);
-        for (String key : keysToSave) {
-            try {
-                String[] parts = key.split("\\|", 2);
-                if (parts.length != 2) {
-                    dirtyJobSaves.remove(key);
-                    continue;
+        ExecutorService executor = ensureDbExecutor();
+        if (force || executor.isShutdown()) {
+            flushKeysSync(keysToSave);
+            return;
+        }
+        List<SaveSnapshot> snapshots = captureSnapshots(keysToSave);
+        executor.execute(() -> {
+            for (SaveSnapshot snap : snapshots) {
+                if (saveJobToDatabase(snap.uuid, snap.playerName, snap.jobId, snap.level, snap.xp, snap.isActive)) {
+                    dirtyJobSaves.remove(snap.key);
                 }
+            }
+        });
+    }
 
-                UUID uuid = UUID.fromString(parts[0]);
-                String jobId = parts[1];
-                Map<String, JobData> history = playerJobs.get(uuid);
-                boolean saved = true;
-                if (history != null) {
-                    JobData data = history.get(jobId);
-                    if (data != null) {
-                        saved = saveJobToDatabase(uuid, jobId, data);
-                    }
-                }
-                if (saved) {
-                    dirtyJobSaves.remove(key);
+    private void flushDirtySavesSync() {
+        if (dirtyJobSaves.isEmpty()) return;
+        flushKeysSync(new ArrayList<>(dirtyJobSaves));
+    }
+
+    private void flushKeysSync(List<String> keysToSave) {
+        for (SaveSnapshot snap : captureSnapshots(keysToSave)) {
+            try {
+                if (saveJobToDatabase(snap.uuid, snap.playerName, snap.jobId, snap.level, snap.xp, snap.isActive)) {
+                    dirtyJobSaves.remove(snap.key);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -263,12 +323,53 @@ public class JobManager {
         }
     }
 
+    private List<SaveSnapshot> captureSnapshots(List<String> keysToSave) {
+        List<SaveSnapshot> snapshots = new ArrayList<>();
+        for (String key : keysToSave) {
+            try {
+                String[] parts = key.split("\\|", 2);
+                if (parts.length != 2) {
+                    dirtyJobSaves.remove(key);
+                    continue;
+                }
+                UUID uuid = UUID.fromString(parts[0]);
+                String jobId = parts[1];
+                Map<String, JobData> history = playerJobs.get(uuid);
+                JobData data = history != null ? history.get(jobId) : null;
+                if (data == null) {
+                    dirtyJobSaves.remove(key);
+                    continue;
+                }
+                snapshots.add(new SaveSnapshot(key, uuid, resolvePlayerName(uuid), jobId, Math.max(1L, data.level), sanitizeXp(data.xp), data.isActive));
+            } catch (Exception e) {
+                dirtyJobSaves.remove(key);
+            }
+        }
+        return snapshots;
+    }
+
     public void shutdown() {
-        flushDirtySaves(true);
+        ExecutorService executor = dbExecutor;
+        if (executor != null && !executor.isShutdown()) {
+            executor.shutdown();
+            try {
+                if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                    executor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+        flushDirtySavesSync();
+        dbLoaded = false;
+    }
+
+    private record SaveSnapshot(String key, UUID uuid, String playerName, String jobId, long level, double xp, boolean isActive) {
     }
 
     public Map<String, JobData> getAllJobsHistory(UUID player) {
-        return playerJobs.computeIfAbsent(player, k -> new HashMap<>());
+        return playerJobs.computeIfAbsent(player, k -> new ConcurrentHashMap<>());
     }
 
     public Map<String, JobData> getActiveJobs(UUID player) {

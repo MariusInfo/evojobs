@@ -48,6 +48,7 @@ public class JobMenu extends AbstractContainerMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
+        if (player.level().isClientSide()) return false;
         if (id >= 0 && id < availableJobs.size()) {
             JobDefinition job = availableJobs.get(id);
             Map<String, JobData> activeJobs = JobManager.get().getActiveJobs(player.getUUID());
@@ -80,11 +81,13 @@ public class JobMenu extends AbstractContainerMenu {
         long totalJobLevel = JobProgressionService.getTotalJobLevel(player.getUUID());
         long synergyLevel = JobProgressionService.getSynergyLevel(player.getUUID());
 
-        for (int i = 0; i < availableJobs.size(); i++) {
+        int maxSlots = Math.min(availableJobs.size(), container.getContainerSize());
+        for (int i = 0; i < maxSlots; i++) {
             JobDefinition job = availableJobs.get(i);
-            String[] parts = job.icon.split(":");
-            ResourceLocation loc = parts.length == 2 ? new ResourceLocation(parts[0], parts[1]) : new ResourceLocation("minecraft", parts[0]);
-            Item item = ForgeRegistries.ITEMS.getValue(loc);
+            String iconRaw = (job.icon != null && !job.icon.isBlank()) ? job.icon : "minecraft:paper";
+            String[] parts = iconRaw.split(":", 2);
+            ResourceLocation loc = parts.length == 2 ? ResourceLocation.tryBuild(parts[0], parts[1]) : ResourceLocation.tryBuild("minecraft", parts[0]);
+            Item item = loc != null ? ForgeRegistries.ITEMS.getValue(loc) : Items.BARRIER;
             if (item == null) item = Items.BARRIER;
 
             ItemStack displayStack = new ItemStack(item);

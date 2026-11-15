@@ -1,10 +1,10 @@
 package org.evocraft.evojobs;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent; // Import adaugat
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -16,6 +16,7 @@ import org.evocraft.evojobs.init.EvoJobsMenuTypes;
 import org.evocraft.evojobs.entity.EvoJobsEntities;
 import org.evocraft.evojobs.entity.JobNPCEntity;
 import org.evocraft.evojobs.entity.QuestNPC;
+import org.evocraft.evojobs.listeners.TractorFarmingListener;
 import org.evocraft.evojobs.quest.QuestManager;
 import org.slf4j.Logger;
 
@@ -32,7 +33,6 @@ public class Evojobs {
         EvoJobsMenuTypes.MENUS.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(this::clientSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -51,12 +51,6 @@ public class Evojobs {
         });
     }
 
-    private void clientSetup(final FMLClientSetupEvent event) {
-        event.enqueueWork(() -> {
-            MenuScreens.register(EvoJobsMenuTypes.JOB_MENU.get(), org.evocraft.evojobs.gui.JobScreen::new);
-        });
-    }
-
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("[EvoJobs] Serverul porneste. Incarcam config-urile si bazele de date...");
@@ -65,6 +59,9 @@ public class Evojobs {
         JobEnchantCompatConfigManager.get().load();
         JobStationManager.get().load();
         AntiExploitManager.get().load();
+        if (JobManager.get() != null) {
+            JobManager.get().ensureLoaded();
+        }
 
         // --- INITIALIZARE QUEST-URI ---
         QuestManager.initialize();
@@ -79,6 +76,17 @@ public class Evojobs {
             JobManager.get().shutdown();
         }
         AntiExploitManager.get().shutdown();
+        JobProgressionService.clearAllTemporaryBoosts();
+        MajruszHarvesterCompatEvents.clearAll();
+        TractorFarmingListener.clearAll();
+    }
+
+    @SubscribeEvent
+    public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        var uuid = event.getEntity().getUUID();
+        JobProgressionService.clearTemporaryBoost(uuid);
+        MajruszHarvesterCompatEvents.clearPlayer(uuid);
+        TractorFarmingListener.clearPlayer(uuid);
     }
 
     @SubscribeEvent
@@ -98,6 +106,15 @@ public class Evojobs {
 
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = net.minecraftforge.api.distmarker.Dist.CLIENT)
     public static class ClientEvents {
+        @SubscribeEvent
+        public static void onClientSetup(FMLClientSetupEvent event) {
+            event.enqueueWork(() ->
+                    net.minecraft.client.gui.screens.MenuScreens.register(
+                            EvoJobsMenuTypes.JOB_MENU.get(),
+                            org.evocraft.evojobs.gui.JobScreen::new
+                    ));
+        }
+
         @SubscribeEvent
         public static void onRegisterRenderers(net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(EvoJobsEntities.JOB_NPC.get(), org.evocraft.evojobs.entity.JobNPCRenderer::new);

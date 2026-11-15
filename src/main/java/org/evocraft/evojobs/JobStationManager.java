@@ -10,10 +10,11 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class JobStationManager {
     private static JobStationManager INSTANCE;
-    private final Set<String> stations = new HashSet<>();
+    private final Set<String> stations = ConcurrentHashMap.newKeySet();
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final File saveFile;
 
@@ -42,6 +43,8 @@ public class JobStationManager {
     }
 
     public void save() {
+        File parent = saveFile.getParentFile();
+        if (parent != null && !parent.exists()) parent.mkdirs();
         try (Writer writer = new FileWriter(saveFile)) {
             gson.toJson(stations, writer);
         } catch (IOException e) { e.printStackTrace(); }
@@ -51,7 +54,10 @@ public class JobStationManager {
         if (!saveFile.exists()) return;
         try (Reader reader = new FileReader(saveFile)) {
             Set<String> loaded = gson.fromJson(reader, new TypeToken<HashSet<String>>(){}.getType());
-            if (loaded != null) stations.addAll(loaded);
+            if (loaded != null) {
+                stations.clear();
+                stations.addAll(loaded);
+            }
         } catch (IOException e) { e.printStackTrace(); }
     }
 }
