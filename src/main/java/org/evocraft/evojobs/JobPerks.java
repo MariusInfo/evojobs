@@ -55,19 +55,20 @@ public class JobPerks {
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.side.isClient() || event.phase == TickEvent.Phase.START) return;
         if (!(event.player instanceof ServerPlayer player)) return;
+        if (player.isSpectator()) return;
 
         // UNEMPLOYED L100: Mega JackPot
-        if (player.tickCount % 72000 == 0) {
-            if (getJobLevel(player, "somer") >= 100 && Math.random() < 0.05) {
+        if (!player.isCreative() && player.tickCount % 72000 == 0) {
+            if (getJobLevel(player, "somer") >= 100 && player.getRandom().nextDouble() < 0.05) {
                 EconomyManager.get().addBalance(player.getUUID(), 50000.0);
                 player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§6§lJACKPOT! §eYou won " + JobProgressionService.formatMoney(50000.0) + " in the automatic lottery!"));
             }
         }
 
         // UNEMPLOYED L50: Fool's Luck
-        if (player.tickCount % 100 == 0 && (player.zza != 0 || player.xxa != 0)) {
-            if (getJobLevel(player, "somer") >= 50 && Math.random() < 0.05) {
-                double found = 10.0 + (Math.random() * 40.0);
+        if (!player.isCreative() && player.tickCount % 100 == 0 && (player.zza != 0 || player.xxa != 0)) {
+            if (getJobLevel(player, "somer") >= 50 && player.getRandom().nextDouble() < 0.05) {
+                double found = 10.0 + (player.getRandom().nextDouble() * 40.0);
                 EconomyManager.get().addBalance(player.getUUID(), found);
                 player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§aYou found " + JobProgressionService.formatMoney(found) + " on the ground while walking!"));
             }
@@ -174,10 +175,11 @@ public class JobPerks {
     // ==========================================
     // 2. EFFECTS ON BLOCK BREAK / PLACE
     // ==========================================
-    @SubscribeEvent(priority = EventPriority.LOW)
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
         if (event.isCanceled() || isPerkAction) return;
         if (!(event.getPlayer() instanceof ServerPlayer player)) return;
+        if (player.isSpectator()) return;
         BlockPos pos = event.getPos();
         BlockState state = event.getState();
         ServerLevel level = (ServerLevel) player.level();
@@ -193,29 +195,39 @@ public class JobPerks {
                 event.setCanceled(true);
 
                 Block.dropResources(state, level, pos, null, player, player.getMainHandItem());
-                if (farmerLvl >= 75 && Math.random() < 0.2) Block.dropResources(state, level, pos, null, player, player.getMainHandItem());
+                if (!player.isCreative() && farmerLvl >= 75 && player.getRandom().nextDouble() < 0.2) {
+                    Block.dropResources(state, level, pos, null, player, player.getMainHandItem());
+                }
                 level.setBlock(pos, crop.getStateForAge(0), 3);
                 return;
             }
         }
 
+        if (player.isCreative()) return;
+
         // ⛏️ MINER
         long minerLvl = getJobLevel(player, "miner");
-        if (minerLvl >= 50 && player.isCrouching() && state.is(Tags.Blocks.ORES)) {
+        if (minerLvl >= 50 && player.isCrouching() && state.is(Tags.Blocks.ORES) && isHoldingTool(player, true, false, false)) {
             isPerkAction = true;
-            breakGroup(level, pos, state.getBlock(), player, 16);
-            isPerkAction = false;
+            try {
+                breakGroup(level, pos, state.getBlock(), player, 16, true, false);
+            } finally {
+                isPerkAction = false;
+            }
         }
-        if (minerLvl >= 100 && state.is(Tags.Blocks.ORES) && Math.random() < 0.1) {
+        if (minerLvl >= 100 && state.is(Tags.Blocks.ORES) && player.getRandom().nextDouble() < 0.1) {
             Block.dropResources(state, level, pos, null, player, player.getMainHandItem());
         }
 
         // 🪓 WOODCUTTER
         long woodLvl = getJobLevel(player, "woodcutter");
-        if (woodLvl >= 50 && player.isCrouching() && state.is(BlockTags.LOGS)) {
+        if (woodLvl >= 50 && player.isCrouching() && state.is(BlockTags.LOGS) && isHoldingTool(player, false, true, false)) {
             isPerkAction = true;
-            breakGroup(level, pos, state.getBlock(), player, 32);
-            isPerkAction = false;
+            try {
+                breakGroup(level, pos, state.getBlock(), player, 32, false, true);
+            } finally {
+                isPerkAction = false;
+            }
 
             if (woodLvl >= 100) {
                 BlockState stateBelow = level.getBlockState(pos.below());
@@ -233,52 +245,107 @@ public class JobPerks {
                 }
             }
         }
-        if (woodLvl >= 100 && state.is(BlockTags.LOGS) && Math.random() < 0.15) {
+        if (woodLvl >= 100 && state.is(BlockTags.LOGS) && player.getRandom().nextDouble() < 0.15) {
             Block.dropResources(state, level, pos, null, player, player.getMainHandItem());
         }
 
         // 🪚 DIGGER
         long digLvl = getJobLevel(player, "digger");
-        if (digLvl >= 50 && player.isCrouching() && (state.is(BlockTags.DIRT) || state.is(BlockTags.SAND) || state.is(Tags.Blocks.GRAVEL))) {
+        if (digLvl >= 50 && player.isCrouching()
+                && (state.is(BlockTags.DIRT) || state.is(BlockTags.SAND) || state.is(Tags.Blocks.GRAVEL))
+                && isHoldingTool(player, false, false, true)) {
             isPerkAction = true;
-            for(int x = -1; x <= 1; x++) for(int z = -1; z <= 1; z++) {
-                BlockPos p = pos.offset(x, 0, z);
-                if (level.getBlockState(p).is(state.getBlock())) level.destroyBlock(p, true, player);
+            try {
+                for (int x = -1; x <= 1; x++) {
+                    for (int z = -1; z <= 1; z++) {
+                        if (x == 0 && z == 0) continue;
+                        if (!player.isAlive() || !isHoldingTool(player, false, false, true)) break;
+                        BlockPos p = pos.offset(x, 0, z);
+                        if (level.getBlockState(p).is(state.getBlock())) {
+                            player.gameMode.destroyBlock(p);
+                        }
+                    }
+                }
+            } finally {
+                isPerkAction = false;
             }
-            isPerkAction = false;
         }
-        if (digLvl >= 100 && (state.is(BlockTags.DIRT) || state.is(BlockTags.SAND)) && Math.random() < 0.02) {
+        if (digLvl >= 100 && (state.is(BlockTags.DIRT) || state.is(BlockTags.SAND)) && player.getRandom().nextDouble() < 0.02) {
             Item[] treasures = {Items.BONE, Items.EMERALD, Items.GOLD_NUGGET, Items.DIAMOND};
             Block.popResource(level, pos, new ItemStack(treasures[player.getRandom().nextInt(treasures.length)]));
         }
 
         // 🗜️ BLACKSMITH (L25 Passive Unbreaking)
         long smithLvl = getJobLevel(player, "fierar");
-        if (smithLvl >= 25 && player.getMainHandItem().isDamageableItem() && Math.random() < 0.15) {
+        if (smithLvl >= 25 && player.getMainHandItem().isDamageableItem() && player.getRandom().nextDouble() < 0.15) {
             ItemStack hand = player.getMainHandItem();
             if (hand.getDamageValue() > 0) hand.setDamageValue(hand.getDamageValue() - 1);
         }
     }
 
-    private static void breakGroup(ServerLevel lvl, BlockPos p, Block target, ServerPlayer pl, int max) {
+    private static boolean isHoldingTool(ServerPlayer pl, boolean pickaxe, boolean axe, boolean shovel) {
+        ItemStack stack = pl.getMainHandItem();
+        if (stack.isEmpty()) return false;
+        if (pickaxe) return stack.getItem() instanceof PickaxeItem || stack.is(ItemTags.PICKAXES);
+        if (axe) return stack.getItem() instanceof AxeItem || stack.is(ItemTags.AXES);
+        if (shovel) return stack.getItem() instanceof ShovelItem || stack.is(ItemTags.SHOVELS);
+        return false;
+    }
+
+    private static void breakGroup(ServerLevel lvl, BlockPos p, Block target, ServerPlayer pl, int max, boolean pickaxe, boolean axe) {
         Queue<BlockPos> q = new LinkedList<>(); q.add(p);
         Set<BlockPos> v = new HashSet<>(); v.add(p);
         int count = 0;
-        while(!q.isEmpty() && count < max) {
+        while (!q.isEmpty() && count < max) {
+            if (!pl.isAlive() || !isHoldingTool(pl, pickaxe, axe, false)) break;
             BlockPos curr = q.poll();
-            if(!curr.equals(p)) { lvl.destroyBlock(curr, true, pl); count++; }
-            for(BlockPos n : BlockPos.betweenClosed(curr.offset(-1,-1,-1), curr.offset(1,1,1))) {
+            if (!curr.equals(p)) {
+                if (pl.gameMode.destroyBlock(curr)) {
+                    count++;
+                } else {
+                    continue;
+                }
+            }
+            for (BlockPos n : BlockPos.betweenClosed(curr.offset(-1,-1,-1), curr.offset(1,1,1))) {
                 BlockPos imm = n.immutable();
-                if(!v.contains(imm) && lvl.getBlockState(imm).is(target)) { v.add(imm); q.add(imm); }
+                if (!v.contains(imm) && lvl.getBlockState(imm).is(target)) {
+                    v.add(imm);
+                    q.add(imm);
+                }
             }
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            if (getJobLevel(player, "builder") >= 100 && Math.random() < 0.10) {
-                player.addItem(new ItemStack(event.getPlacedBlock().getBlock()));
+        if (event.isCanceled()) return;
+        if (event.getEntity() instanceof ServerPlayer player && !player.isCreative() && !player.isSpectator()) {
+            BlockState placedState = event.getPlacedBlock();
+            Block placedBlock = placedState.getBlock();
+            if (placedState.hasBlockEntity()
+                    || placedState.is(Tags.Blocks.STORAGE_BLOCKS)
+                    || placedState.is(Tags.Blocks.ORES)
+                    || placedBlock == Blocks.BEACON
+                    || placedBlock == Blocks.ANCIENT_DEBRIS
+                    || placedBlock == Blocks.DRAGON_EGG
+                    || placedBlock == Blocks.RESPAWN_ANCHOR
+                    || placedBlock == Blocks.LODESTONE
+                    || placedBlock == Blocks.ENCHANTING_TABLE
+                    || placedBlock == Blocks.ANVIL
+                    || placedBlock == Blocks.CHIPPED_ANVIL
+                    || placedBlock == Blocks.DAMAGED_ANVIL
+                    || placedBlock == Blocks.TNT
+                    || placedBlock instanceof net.minecraft.world.level.block.BedBlock
+                    || placedBlock instanceof net.minecraft.world.level.block.DoorBlock
+                    || placedBlock instanceof net.minecraft.world.level.block.ShulkerBoxBlock) {
+                return;
+            }
+            Item blockItem = placedBlock.asItem();
+            if (blockItem == Items.AIR) return;
+            if (!player.getMainHandItem().is(blockItem) && !player.getOffhandItem().is(blockItem)) return;
+
+            if (getJobLevel(player, "builder") >= 100 && player.getRandom().nextDouble() < 0.10) {
+                player.addItem(new ItemStack(blockItem));
             }
         }
     }
@@ -286,17 +353,20 @@ public class JobPerks {
     // ==========================================
     // 3. COMBAT (HUNTER / BUILDER)
     // ==========================================
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDeath(LivingDeathEvent event) {
-        if (event.getSource().getEntity() instanceof ServerPlayer player) {
+        if (event.isCanceled()) return;
+        if (event.getSource().getEntity() instanceof ServerPlayer player && !player.isSpectator()) {
             if (getJobLevel(player, "hunter") >= 50) player.heal(1.0f);
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDrops(LivingDropsEvent event) {
-        if (event.getSource().getEntity() instanceof ServerPlayer player && getJobLevel(player, "hunter") >= 100) {
-            if (Math.random() < 0.1) {
+        if (event.isCanceled()) return;
+        if (event.getSource().getEntity() instanceof ServerPlayer player && !player.isCreative() && !player.isSpectator()
+                && getJobLevel(player, "hunter") >= 100) {
+            if (player.getRandom().nextDouble() < 0.1) {
                 net.minecraft.world.entity.LivingEntity killed = event.getEntity();
                 ItemStack head = ItemStack.EMPTY;
 
@@ -348,46 +418,79 @@ public class JobPerks {
     // ==========================================
     @SubscribeEvent
     public static void onAnvilRepair(AnvilRepairEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
+        if (event.getEntity() instanceof ServerPlayer player && !player.isCreative() && !player.isSpectator()) {
+            if (event.getLeft().isEmpty() || event.getRight().isEmpty()) return;
             long fierarLvl = getJobLevel(player, "fierar");
 
             // L50: Solid Anvil (20%)
-            if (fierarLvl >= 50 && Math.random() < 0.20) {
+            if (fierarLvl >= 50 && player.getRandom().nextDouble() < 0.20) {
                 event.setBreakChance(0.0f);
             }
 
             // =======================================================
-            // 🗜️ BLACKSMITH L75: DISCOUNT VIA XP CASHBACK
-            // When taking the item out of the anvil, the system gives
-            // back XP levels instantly, compensating the real cost!
+            // 🗜️ BLACKSMITH L75: ANVIL XP CASHBACK
+            // Grants 1 XP level cashback when combining/repairing items,
+            // preventing positive XP profit on cheap repairs.
             // =======================================================
             if (fierarLvl >= 75) {
-                int cashbackLevels = 2 + player.getRandom().nextInt(4); // Returns between 2 and 5 levels
-                player.giveExperienceLevels(cashbackLevels);
-                player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§a[Blacksmith] You received " + cashbackLevels + " XP levels cashback from the anvil!"));
+                player.giveExperienceLevels(1);
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§a[Blacksmith] You received 1 XP level cashback from the anvil!"));
             }
         }
     }
 
+    private static final Set<String> CRAFT_PERK_BLACKLIST = Set.of(
+            "minecraft:iron_block", "minecraft:iron_ingot", "minecraft:iron_nugget",
+            "minecraft:gold_block", "minecraft:gold_ingot", "minecraft:gold_nugget",
+            "minecraft:diamond_block", "minecraft:diamond",
+            "minecraft:emerald_block", "minecraft:emerald",
+            "minecraft:redstone_block", "minecraft:redstone",
+            "minecraft:lapis_block", "minecraft:lapis_lazuli",
+            "minecraft:coal_block", "minecraft:coal",
+            "minecraft:copper_block", "minecraft:copper_ingot",
+            "minecraft:netherite_block", "minecraft:netherite_ingot", "minecraft:netherite_scrap",
+            "minecraft:raw_iron_block", "minecraft:raw_gold_block", "minecraft:raw_copper_block",
+            "minecraft:quartz_block", "minecraft:hay_block", "minecraft:wheat",
+            "minecraft:bone_block", "minecraft:bone_meal",
+            "minecraft:slime_block", "minecraft:slime_ball",
+            "minecraft:honey_block", "minecraft:honeycomb_block",
+            "minecraft:dried_kelp_block", "minecraft:melon", "minecraft:melon_slice",
+            "minecraft:beacon", "minecraft:shulker_box", "minecraft:enchanted_golden_apple"
+    );
+
     @SubscribeEvent
     public static void onCraftItem(PlayerEvent.ItemCraftedEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (player.isCreative() || player.isSpectator()) return;
+        ItemStack crafted = event.getCrafting();
+        if (crafted.isEmpty() || crafted.isDamageableItem()) return;
+        net.minecraft.resources.ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(crafted.getItem());
+        if (id == null || CRAFT_PERK_BLACKLIST.contains(id.toString()) || id.getPath().contains("shulker_box")) return;
+        if (crafted.getItem() instanceof BlockItem bi && bi.getBlock().defaultBlockState().hasBlockEntity()) return;
+
         long craftLvl = getJobLevel(player, "crafter");
 
-        if (craftLvl >= 75 && Math.random() < 0.10) {
+        if (craftLvl >= 75 && player.getRandom().nextDouble() < 0.10) {
             for (int i = 0; i < event.getInventory().getContainerSize(); i++) {
                 ItemStack ing = event.getInventory().getItem(i);
-                if (!ing.isEmpty()) { player.addItem(new ItemStack(ing.getItem())); break; }
+                if (!ing.isEmpty() && !ing.isDamageableItem() && !ing.hasTag()) {
+                    net.minecraft.resources.ResourceLocation ingId = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(ing.getItem());
+                    if (ingId != null && !CRAFT_PERK_BLACKLIST.contains(ingId.toString())) {
+                        player.addItem(new ItemStack(ing.getItem()));
+                    }
+                    break;
+                }
             }
         }
-        if (craftLvl >= 100 && Math.random() < 0.15) {
-            player.addItem(event.getCrafting().copy());
+        if (craftLvl >= 100 && player.getRandom().nextDouble() < 0.15) {
+            player.addItem(crafted.copy());
             player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§d[Crafter] You crafted double product for free!"));
         }
     }
 
     @SubscribeEvent
     public static void onVillagerInteract(PlayerInteractEvent.EntityInteract event) {
+        if (event.isCanceled()) return;
         if (!event.getLevel().isClientSide() && event.getTarget() instanceof Villager villager && event.getEntity() instanceof ServerPlayer player) {
             if (getJobLevel(player, "trader") >= 100) {
                 villager.getOffers().forEach(net.minecraft.world.item.trading.MerchantOffer::resetUses);
@@ -395,11 +498,12 @@ public class JobPerks {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onItemFished(ItemFishedEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
+        if (event.isCanceled()) return;
+        if (event.getEntity() instanceof ServerPlayer player && !player.isCreative() && !player.isSpectator()) {
             long fishLvl = getJobLevel(player, "fisherman");
-            if (fishLvl >= 100 && Math.random() < 0.05) {
+            if (fishLvl >= 100 && player.getRandom().nextDouble() < 0.05) {
                 event.getDrops().add(new ItemStack(Items.ENCHANTED_BOOK));
                 player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§b[Fisherman] You fished a treasure of the sea!"));
             }

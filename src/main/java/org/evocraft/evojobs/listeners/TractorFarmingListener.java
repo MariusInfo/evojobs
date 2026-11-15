@@ -17,17 +17,33 @@ import org.evocraft.evojobs.JobEvents;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Mod.EventBusSubscriber(modid = "evojobs", bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class TractorFarmingListener {
 
     // Mature crops that the tractor is about to drive over.
-    private static final Map<UUID, Map<BlockPos, String>> trackedCrops = new HashMap<>();
+    private static final Map<UUID, Map<BlockPos, String>> trackedCrops = new ConcurrentHashMap<>();
+
+    public static void clearPlayer(UUID uuid) {
+        if (uuid != null) {
+            trackedCrops.remove(uuid);
+        }
+    }
+
+    public static void clearAll() {
+        trackedCrops.clear();
+    }
 
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.side.isClient() || event.phase == TickEvent.Phase.START) return;
         if (!(event.player instanceof ServerPlayer player)) return;
+
+        if (player.isCreative() || player.isSpectator()) {
+            trackedCrops.remove(player.getUUID());
+            return;
+        }
 
         Entity vehicle = player.getVehicle();
 
@@ -85,7 +101,7 @@ public class TractorFarmingListener {
                             if ((block instanceof CropBlock crop && crop.isMaxAge(state)) || block == Blocks.MELON || block == Blocks.PUMPKIN) {
                                 ResourceLocation key = ForgeRegistries.BLOCKS.getKey(block);
                                 if (key != null) {
-                                    currentCrops.put(scanPos, key.toString());
+                                    currentCrops.put(scanPos.immutable(), key.toString());
                                 }
                             }
                         }

@@ -51,7 +51,7 @@ public class JobPermissionManager {
             return Boolean.TRUE.equals(allowed);
         } catch (ClassNotFoundException ignored) {
             return false;
-        } catch (Exception ignored) {
+        } catch (Throwable ignored) {
             return false;
         }
     }

@@ -97,7 +97,7 @@ public class QuestManager {
         POOL.add(new QuestTemplate("miner", "BREAK", "minecraft:amethyst_cluster", "Amethyst Cluster", 32, 3000, 250));
 
         // ===============================================
-        // 🪓 WOODCUTTER (12 Quests)
+        // 🪓 WOODCUTTER (10 Quests)
         // ===============================================
         POOL.add(new QuestTemplate("woodcutter", "BREAK", "minecraft:oak_log", "Oak Logs", 128, 1200, 100));
         POOL.add(new QuestTemplate("woodcutter", "BREAK", "minecraft:spruce_log", "Spruce Logs", 128, 1200, 100));
@@ -109,8 +109,6 @@ public class QuestManager {
         POOL.add(new QuestTemplate("woodcutter", "BREAK", "minecraft:mangrove_log", "Mangrove Logs", 64, 1500, 130));
         POOL.add(new QuestTemplate("woodcutter", "BREAK", "minecraft:crimson_stem", "Crimson Stems", 64, 1600, 150));
         POOL.add(new QuestTemplate("woodcutter", "BREAK", "minecraft:warped_stem", "Warped Stems", 64, 1600, 150));
-        POOL.add(new QuestTemplate("woodcutter", "BREAK", "minecraft:oak_leaves", "Oak Leaves", 256, 1000, 80));
-        POOL.add(new QuestTemplate("woodcutter", "BREAK", "minecraft:spruce_leaves", "Spruce Leaves", 256, 1000, 80));
 
         // ===============================================
         // 🪚 DIGGER (10 Quests)
@@ -146,7 +144,7 @@ public class QuestManager {
         POOL.add(new QuestTemplate("hunter", "KILL", "minecraft:witch", "Witches", 10, 4000, 350));
 
         // ===============================================
-        // 🌾 FARMER (12 Quests)
+        // 🌾 FARMER (11 Quests)
         // ===============================================
         POOL.add(new QuestTemplate("farmer", "BREAK", "minecraft:wheat", "Wheat Crops", 128, 1500, 100));
         POOL.add(new QuestTemplate("farmer", "BREAK", "minecraft:carrots", "Carrots", 128, 1500, 100));
@@ -159,7 +157,6 @@ public class QuestManager {
         POOL.add(new QuestTemplate("farmer", "BREAK", "minecraft:nether_wart", "Nether Wart", 64, 2500, 200));
         POOL.add(new QuestTemplate("farmer", "BREAK", "minecraft:sweet_berry_bush", "Sweet Berries", 128, 1300, 90));
         POOL.add(new QuestTemplate("farmer", "BREAK", "minecraft:cactus", "Cactus", 64, 1400, 100));
-        POOL.add(new QuestTemplate("farmer", "BREAK", "minecraft:brown_mushroom", "Brown Mushrooms", 32, 1200, 80));
 
         // ===============================================
         // 🎣 FISHERMAN (5 Quests)
@@ -208,7 +205,7 @@ public class QuestManager {
         // ===============================================
         // BLACKSMITH (3 quests)
         // ===============================================
-        POOL.add(new QuestTemplate("fierar", "USE_ANVIL", "*", "Use Anvil (Repair/Rename)", 10, 4000, 350));
+        POOL.add(new QuestTemplate("fierar", "USE_ANVIL", "*", "Use Anvil (Repair/Enhance)", 10, 4000, 350));
         POOL.add(new QuestTemplate("fierar", "USE_ANVIL", "*", "Craft/Repair Gear", 15, 6000, 500));
         POOL.add(new QuestTemplate("fierar", "USE_ANVIL", "*", "Master Blacksmithing", 20, 8000, 700));
 
@@ -219,18 +216,22 @@ public class QuestManager {
         POOL.add(new QuestTemplate("trader", "TRADE", "*", "Merchant Deals", 25, 7000, 600));
         POOL.add(new QuestTemplate("trader", "TRADE", "*", "Market Monopoly", 40, 10000, 900));
 
-        try {
-            Connection conn = DatabaseManager.get().getConnection();
-            if (conn != null && !conn.isClosed()) {
-                conn.createStatement().execute("CREATE TABLE IF NOT EXISTS daily_quests (" +
-                        "uuid VARCHAR(36) PRIMARY KEY, date_id BIGINT, " +
-                        "q0_prog INT DEFAULT 0, q0_claimed BOOLEAN DEFAULT FALSE, " +
-                        "q1_prog INT DEFAULT 0, q1_claimed BOOLEAN DEFAULT FALSE, " +
-                        "q2_prog INT DEFAULT 0, q2_claimed BOOLEAN DEFAULT FALSE, " +
-                        "q3_prog INT DEFAULT 0, q3_claimed BOOLEAN DEFAULT FALSE, " +
-                        "q4_prog INT DEFAULT 0, q4_claimed BOOLEAN DEFAULT FALSE)");
-            }
-        } catch (Exception e) { e.printStackTrace(); }
+        synchronized (DatabaseManager.get()) {
+            try {
+                Connection conn = DatabaseManager.get().getConnection();
+                if (conn != null && !conn.isClosed()) {
+                    try (java.sql.Statement stmt = conn.createStatement()) {
+                        stmt.execute("CREATE TABLE IF NOT EXISTS daily_quests (" +
+                                "uuid VARCHAR(36) PRIMARY KEY, date_id BIGINT, " +
+                                "q0_prog INT DEFAULT 0, q0_claimed BOOLEAN DEFAULT FALSE, " +
+                                "q1_prog INT DEFAULT 0, q1_claimed BOOLEAN DEFAULT FALSE, " +
+                                "q2_prog INT DEFAULT 0, q2_claimed BOOLEAN DEFAULT FALSE, " +
+                                "q3_prog INT DEFAULT 0, q3_claimed BOOLEAN DEFAULT FALSE, " +
+                                "q4_prog INT DEFAULT 0, q4_claimed BOOLEAN DEFAULT FALSE)");
+                    }
+                }
+            } catch (Exception e) { e.printStackTrace(); }
+        }
 
         generateQuestsForToday();
     }
@@ -261,7 +262,11 @@ public class QuestManager {
         }
     }
 
-    public static void generateQuestsForToday() {
+    public static synchronized List<DailyQuest> getTodaysQuestsSnapshot() {
+        return new ArrayList<>(TODAYS_QUESTS);
+    }
+
+    public static synchronized void generateQuestsForToday() {
         long today = LocalDate.now().toEpochDay();
         if (currentSeed == today && !TODAYS_QUESTS.isEmpty()) return;
 
@@ -292,24 +297,32 @@ public class QuestManager {
         }
     }
 
-    public static void onAction(ServerPlayer player, String jobId, String action, String target, int amount) {
+    public static synchronized void onAction(ServerPlayer player, String jobId, String action, String target, int amount) {
+        if (player == null || player.isCreative() || player.isSpectator() || amount <= 0) return;
         if (TODAYS_QUESTS.isEmpty()) return;
 
+        String normalizedTarget = normalizeId(target);
         for (int i = 0; i < TODAYS_QUESTS.size(); i++) {
             DailyQuest q = TODAYS_QUESTS.get(i);
             if (q.template.jobId.equals(jobId) && q.template.action.equals(action)) {
-                if (q.template.target.equals("*") || q.template.target.equals(target) || target.endsWith(q.template.target.replace("minecraft:", ""))) {
-                    addProgress(player, i, amount, q);
+                String templateTarget = normalizeId(q.template.target);
+                if ("*".equals(templateTarget) || templateTarget.equals(normalizedTarget)) {
+                    addProgress(player, i, amount, q, currentSeed);
                     break;
                 }
             }
         }
     }
 
-    private static void addProgress(ServerPlayer player, int questIndex, int amount, DailyQuest quest) {
+    private static String normalizeId(String id) {
+        if (id == null) return "";
+        String trimmed = id.trim().toLowerCase(Locale.ROOT);
+        return trimmed.startsWith("minecraft:") ? trimmed.substring("minecraft:".length()) : trimmed;
+    }
+
+    private static void addProgress(ServerPlayer player, int questIndex, int amount, DailyQuest quest, long questDate) {
         UUID playerUuid = player.getUUID();
         MinecraftServer server = player.getServer();
-        long questDate = currentSeed;
 
         ensureQuestDbExecutor().execute(() -> {
             synchronized (DatabaseManager.get()) {
@@ -387,23 +400,26 @@ public class QuestManager {
 
     public static int[] getPlayerProgress(ServerPlayer player) {
         int[] data = new int[10];
-        try {
-            Connection conn = DatabaseManager.get().getConnection();
-            if (conn != null && !conn.isClosed()) {
-                try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM daily_quests WHERE uuid = ? AND date_id = ?")) {
-                    stmt.setString(1, player.getUUID().toString());
-                    stmt.setLong(2, currentSeed);
-                    try (ResultSet rs = stmt.executeQuery()) {
-                        if (rs.next()) {
-                            for (int i = 0; i < 5; i++) {
-                                data[i*2] = rs.getInt("q" + i + "_prog");
-                                data[i*2+1] = rs.getBoolean("q" + i + "_claimed") ? 1 : 0;
+        long questDate = currentSeed;
+        synchronized (DatabaseManager.get()) {
+            try {
+                Connection conn = DatabaseManager.get().getConnection();
+                if (conn != null && !conn.isClosed()) {
+                    try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM daily_quests WHERE uuid = ? AND date_id = ?")) {
+                        stmt.setString(1, player.getUUID().toString());
+                        stmt.setLong(2, questDate);
+                        try (ResultSet rs = stmt.executeQuery()) {
+                            if (rs.next()) {
+                                for (int i = 0; i < 5; i++) {
+                                    data[i*2] = rs.getInt("q" + i + "_prog");
+                                    data[i*2+1] = rs.getBoolean("q" + i + "_claimed") ? 1 : 0;
+                                }
                             }
                         }
                     }
                 }
-            }
-        } catch (Exception e) { e.printStackTrace(); }
+            } catch (Exception e) { e.printStackTrace(); }
+        }
         return data;
     }
 }
